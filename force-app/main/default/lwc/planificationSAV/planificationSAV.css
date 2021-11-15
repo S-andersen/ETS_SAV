@@ -70,9 +70,9 @@
 .layout-1 {
   margin-bottom: var(--lwc-spacingSmall);
   margin-top: var(--lwc-spacingSmall);
-  margin-left: var(--lwc-spacingXSmall);
+  margin-left: var(--lwc-spacingSmall);
   margin-right: var(--lwc-spacingXSmall);
-  text-align: center;
+  text-align: left;
 }
 .span-3 {
 }
@@ -93,8 +93,8 @@
 
 table {
   table-layout:auto;
-  width:auto; 
-  border-style:solid;
+  /* width:auto;  */
+  border-style:none;
   font-weight:normal;
   font-size: 16px;
   margin-left: auto;
@@ -109,8 +109,7 @@ th {
 }
 
 td {
-  border: 1px inset white;
-  white-space:normal;
+  
 }
 
 td.right {

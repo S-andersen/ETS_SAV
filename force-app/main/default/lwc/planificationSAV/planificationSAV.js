@@ -3,7 +3,7 @@ import getInterventions from '@salesforce/apex/InterventionController.getInterve
 import getDailyInterventions from '@salesforce/apex/DailyInterventionController.getDailyInterventions';
 import getAppareilForAccount from '@salesforce/apex/InterventionController.getAppareilForAccount';
 import { NavigationMixin } from 'lightning/navigation';
-import getTodaysDate from '@salesforce/apex/DateController.getTodaysDate';
+
 
 const COLUMNS = [
     { label: 'Code', fieldName: 'APCode__c', type: 'text' },
@@ -14,7 +14,8 @@ const COLUMNS = [
 var interventionIdExemple = 'a019E00000CsXRZQA3';
 export default class planificationSAV extends NavigationMixin(LightningElement){
 
-todaysDate;
+
+today;
 rowCount;
 nrAppareils;
 intervention;
@@ -24,14 +25,30 @@ columns = COLUMNS;
 @track
 dailyInterventions;
 
-@wire(getTodaysDate)
-result(res) {
-    if(res.data){
-        this.todaysDate = res.data; 
-        console.log(res.data);
-    }
-}
+dateDisplay;
+currentDate;
 
+    connectedCallback(){
+        this.setDate();
+    }
+
+    addDays(){
+        this.setDate(1);
+    }
+
+    removeDays(){
+        this.setDate(-1);
+    }
+
+    setDate(days){
+        if(!days){
+            this.currentDate = new Date();
+        }
+        else{
+            this.currentDate.setDate(this.currentDate.getDate() + days);
+        }
+        this.dateDisplay = this.currentDate.toISOString().split('T')[0];
+    }
 
 @wire(getDailyInterventions)
 result(res){
@@ -76,5 +93,7 @@ result(res){
             },
         });
     }
+
+    
 
 }

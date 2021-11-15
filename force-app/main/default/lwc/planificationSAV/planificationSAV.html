@@ -29,17 +29,17 @@
 <span class=&quot;tabulation&quot;><strong>JV: </strong>0</span>"></lightning-formatted-rich-text>
                 </lightning-layout-item>
                 <div class="div-1">
-                    <div class="div-3 slds-grid slds-gutters slds-clearfix">
-                        <div class="slds-col slds-size_2-of-3">
+                    <div class="div-3 slds-grid slds-gutters slds-clearfix layout-1">
+                        <div class="slds-col slds-size_3-of-4">
                             <lightning-layout pull-to-boundary="medium" multiple-rows="true" class="layout-1">
                                 <lightning-layout-item padding="around-small" size="12"
                                     small-device-size="12" medium-device-size="6" large-device-size="6">
-                                    <span class="span-2">Nombres de lignes:
-                                        <div class="slds-form-element__control">
+                                    <span class="span-2">Nombres de lignes: {rowCount}
+                                        <!-- <div class="slds-form-element__control">
                                             <span class="slds-form-element__static">
-                                                <p>{rowCount}</p>
+                                                <p></p>
                                             </span>
-                                        </div>
+                                        </div> -->
                                     </span>
                                     <ul class="ul-1 slds-button-group-row">
                                         <li class="li-1 slds-button-group-item">
@@ -63,20 +63,21 @@
                                             <div class="slds-text-align_center">
                                                 <lightning-button label="Précédent" icon-position="left"
                                                     class="button-1" icon-name="utility:back"
-                                                    onclick={backwardClick}></lightning-button>
+                                                    onclick={removeDays}></lightning-button>
                                             </div>
 
                                             <div
                                                 class="slds-text-align_center slds-m-right_x-small slds-m-left_x-small">
                                                 <lightning-input type="date" variant="label-hidden"
-                                                    name="input1" label="Enter a date" value={displayDate}
-                                                    onchange={PostingDateSet} placeholder={todaysDate} ></lightning-input>
+                                                    name="input1" label="Enter a date" date-style="short" value={dateDisplay} 
+                                                    onchange={today} >
+                                                </lightning-input>
                                             </div>
 
                                             <div class="slds-text-align_center">
                                                 <lightning-button label="Suivant" icon-position="right"
                                                     class="button-1" icon-name="utility:forward"
-                                                    onclick={forwardClick}></lightning-button>
+                                                    onclick={addDays}></lightning-button>
                                             </div>
                                         </lightning-button-group>
                                     </lightning-layout>
@@ -85,7 +86,8 @@
                             <lightning-layout>
                                 <lightning-layout-item>
                                     <table id="Table-id"
-                                        class="slds-table slds-table_cell-buffer slds-table_bordered">
+                                        class="slds-table 
+                                        slds-max-medium-table_stacked-horizontal slds-table_fixed-layout">
                                         <tr>
                                             <th scope="col" class="slds-truncate"
                                                 title="Client">Client</th>
@@ -111,7 +113,7 @@
                                                 title="Qualification">Qualification</th>
                                             <th scope="col" class="slds-truncate"
                                                 title="Technicien">Technicien</th>
-                                            <th scope="col" class="slds-truncate"
+                                            <th scope="col" class="slds-cell-wrap slds-truncate"
                                                 title="Description">Description</th>
                                         </tr>
 
@@ -119,7 +121,7 @@
                                             <template if:true={dailyInterventions}>
                                                 <template for:each={dailyInterventions}
                                                     for:item="interv">
-                                                    <tr class="slds-card slds-card_boundary"
+                                                    <tr class="slds-card slds-card_boundary" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:500px;"
                                                         key={interv.id}>
                                                         <td scope="row"
                                                             class="slds-truncate">
@@ -150,8 +152,8 @@
                                                         <td scope="row"
                                                             class="slds-truncate">
                                                             {interv.technicien}</td>
-                                                        <td scope="row"
-                                                            class="slds-truncate">
+                                                        <td scope="row" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:500px;"
+                                                            class="slds-m-right_large">
                                                             {interv.description}</td>
                                                     </tr>
                                                 </template>
@@ -162,7 +164,7 @@
                             </lightning-layout>
                         </div>
                         <template if:true={intervention}>
-                            <div class="slds-col slds-size_1-of-3">
+                            <div class="slds-col slds-size_1-of-4">
                                 <lightning-layout-item padding="horizontal-medium" size="6"
                                     small-device-size="12" medium-device-size="6" large-device-size="6">
                                     <div class="client-details">
@@ -196,10 +198,10 @@
                                                     <lightning-layout-item size="6">
                                                         <div class="slds-form-element   "><span
                                                                 class="span-6 slds-form-element__label">Nombre
-                                                                d'appareils</span>
+                                                                d'appareils: {nrAppareils} </span>
                                                             <div class="slds-form-element__control">
                                                                 <span class="slds-form-element__static">
-                                                                    <p>{nrAppareils}</p>
+                                                                    <p></p>
                                                                 </span>
                                                             </div>
                                                         </div>

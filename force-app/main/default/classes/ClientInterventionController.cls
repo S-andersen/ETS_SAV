@@ -24,7 +24,6 @@ public with sharing class ClientInterventionController {
             wrapper.shippingPostalCode = clientIntervention.Account__r.shippingPostalCode;
             wrapper.accountingBalance = clientIntervention.Account__r.accountingBalance__c;
             wrapper.startDate = clientIntervention.StartDate__c; 
-            //wrapper.timeOfInterv = clientIntervention.timeOfInterv;
             wrapper.type = clientIntervention.type__c;
             wrapper.interventionQualification = clientIntervention.Qualification__c;
             wrapper.interventionValidateTechnician = clientIntervention.ValidateTechnician__c;
@@ -45,8 +44,6 @@ public with sharing class ClientInterventionController {
         public Double accountingBalance {set;get;}
         @AuraEnabled
         public Datetime startDate {set;get;}
-        /*@AuraEnabled
-        public Datetime timeOfInterv {set;get;} */
         @AuraEnabled
         public String type {set;get;}
         @AuraEnabled
