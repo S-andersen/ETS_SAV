@@ -35,11 +35,6 @@
                                 <lightning-layout-item padding="around-small" size="12"
                                     small-device-size="12" medium-device-size="6" large-device-size="6">
                                     <span class="span-2">Nombres de lignes: {rowCount}
-                                        <!-- <div class="slds-form-element__control">
-                                            <span class="slds-form-element__static">
-                                                <p></p>
-                                            </span>
-                                        </div> -->
                                     </span>
                                     <ul class="ul-1 slds-button-group-row">
                                         <li class="li-1 slds-button-group-item">
@@ -120,10 +115,10 @@
                                         <tbody>
                                             <template if:true={dailyInterventions}>
                                                 <template for:each={dailyInterventions}
-                                                    for:item="interv">
+                                                    for:item="interv" >
                                                     <tr class="slds-card slds-card_boundary" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:500px;"
-                                                        key={interv.id}>
-                                                        <td scope="row"
+                                                        key={interv.id} >
+                                                        <td scope="row"  onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.client}</td>
                                                         <td scope="row"
@@ -183,9 +178,9 @@
                                                 </ul>
                                             </div>
                                             <div class="slds-card__body_inner">
-                                                <lightning-layout class="slds-wrap" multiple-rows="true">
+                                                <lightning-layout class="" multiple-rows="true">
                                                     <lightning-layout-item size="6">
-                                                        <div class="slds-form-element   "><span
+                                                        <div class="slds-  -element   "><span
                                                                 class="span-4 slds-form-element__label">Code</span>
                                                             <div class="slds-form-element__control">
                                                                 <span class="slds-form-element__static">
@@ -244,18 +239,24 @@
                                 <lightning-card title="Description Intervention"
                                     icon-name="standard:maintenance_asset" variant="base">
                                     <div class="slds-card__body_inner">
-                                        <lightning-layout class="slds-wrap" multiple-rows="true">
-                                            <lightning-layout-item size="6">
+                                        <lightning-layout class=" " multiple-rows="true">
+                                            <lightning-layout-item>
+                                                <div class="slds-form-element"><span
+                                                    class="slds-form-element__label">Description</span>
+                                                <div class="slds-form-element__control">
+                                                    <p>{intervention.InterventionDescription__c}</p>
+                                                </div>
+                                            </div>
                                                 <div class="slds-form-element   "><span
                                                         class="slds-form-element__label">Commentaire</span>
-                                                    <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__control ">
                                                         <p>{intervention.Commentaires__c}</p>
                                                     </div>
                                                 </div>
                                             </lightning-layout-item>
                                         </lightning-layout>
-                                        <lightning-layout class="slds-wrap" multiple-rows="true">
-                                            <lightning-layout-item size="6">
+                                        <lightning-layout class="" multiple-rows="true">
+                                            <lightning-layout-item>
                                                 <div class="slds-form-element   "><span
                                                         class="slds-form-element__label">Matériel
                                                         fourni</span>

@@ -94,6 +94,7 @@ result(res){
         });
     }
 
-    
-
+    showIntervention(){
+        this.getInterventions;
+    }
 }

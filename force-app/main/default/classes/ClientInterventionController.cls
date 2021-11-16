@@ -1,7 +1,7 @@
 /*
     @description       : This controller is used to fetch information on all client interventions display in in the main UI table
     @author            : 02/11/2021 by SANDERSEN
-    @last modified on  : 02/11/2021
+    @last modified on  : 15/11/2021
     @last modified by  : SANDERSEN
 */
 
