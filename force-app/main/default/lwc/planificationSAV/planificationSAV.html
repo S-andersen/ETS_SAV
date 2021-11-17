@@ -113,13 +113,13 @@
                                         </tr>
 
                                         <tbody>
-                                            <template if:true={dailyInterventions}>
+                                            <template if:true={dailyInterventions} >
                                                 <template for:each={dailyInterventions}
-                                                    for:item="interv" >
-                                                    <tr class="slds-card slds-card_boundary" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:500px;"
+                                                    for:item="interv" for:index="index">
+                                                    <tr class="slds-card slds-card_boundary tableRows" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:300px;"
                                                         key={interv.id} >
-                                                        <td scope="row"  onclick={showIntervention} ondblclick={navigateToAccount}
-                                                            class="slds-truncate">
+                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
+                                                            class="slds-truncate client">
                                                             {interv.client}</td>
                                                         <td scope="row"
                                                             class="slds-truncate">

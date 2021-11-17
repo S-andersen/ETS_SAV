@@ -93,7 +93,6 @@
 
 table {
   table-layout:auto;
-  /* width:auto;  */
   border-style:none;
   font-weight:normal;
   font-size: 16px;
@@ -110,7 +109,12 @@ th {
 
 td {
   cursor:pointer;
-  
+  max-width: 250px !important;
+}
+
+td.client {
+  color: rgba(145, 72, 0, 1);
+  text-decoration: underline;
 }
 
 td.right {

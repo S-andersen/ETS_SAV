@@ -11,7 +11,6 @@ const COLUMNS = [
     { label: 'Details', fieldName: 'Type__c', type: 'text' }
 ]; 
 
-var interventionIdExemple = 'a019E00000CsXRZQA3';
 export default class planificationSAV extends NavigationMixin(LightningElement){
 
 
@@ -21,12 +20,14 @@ nrAppareils;
 intervention;
 lstAppareil;
 columns = COLUMNS;
+index;
+
 
 @track
 dailyInterventions;
-
 dateDisplay;
 currentDate;
+
 
     connectedCallback(){
         this.setDate();
@@ -55,15 +56,9 @@ result(res){
     if(res.data){
         this.dailyInterventions = res.data;
         this.rowCount = this.dailyInterventions.length;
-        console.log(res.data);
-    }
-}
 
-    @wire(getInterventions, {interventionId : interventionIdExemple})
-    interventions({data, error}){
-        console.log(data);
-        if(data){
-            let tmp = JSON.parse(JSON.stringify(data));
+        getInterventions({interventionId: this.dailyInterventions[0].id})
+        .then(result => { let tmp = JSON.parse(JSON.stringify(result));
             tmp.customerCode = tmp.Account__r.CustomerCode__c;
             this.intervention = tmp;
             console.log(this.intervention);
@@ -76,12 +71,14 @@ result(res){
             })
             .catch(error => {
                 console.log(error);
-            });
-        }else if(error){
+            }); 
+        })
+        .catch(error => {
             console.log(error);
-            this.intervention = undefined;
-        }
-    };
+        }) 
+    }
+}
+
 
     navigateToAccount(){
         this[NavigationMixin.Navigate]({
@@ -93,8 +90,30 @@ result(res){
             },
         });
     }
+    
+    showIntervention(event){
+        console.log('intervention Id:' + event.target.dataset.current);
+       
+        getInterventions({interventionId: event.target.dataset.current})
+        .then(result => { let tmp = JSON.parse(JSON.stringify(result));
+            tmp.customerCode = tmp.Account__r.CustomerCode__c;
+            this.intervention = tmp;
+            console.log(this.intervention);
 
-    showIntervention(){
-        this.getInterventions;
+            getAppareilForAccount({accountId : this.intervention.Account__c})
+            .then(result => {
+                this.lstAppareil = result;
+                this.nrAppareils = this.lstAppareil.length; 
+                console.log(this.lstAppareil);
+            })
+            .catch(error => {
+                console.log(error);
+            }); 
+        })
+
+            .catch(error => {
+                console.log(error);
+            }) 
     }
-}
+
+   }
