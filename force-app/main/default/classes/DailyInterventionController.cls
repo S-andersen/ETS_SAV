@@ -1,11 +1,18 @@
 public with sharing class DailyInterventionController {
    
     @AuraEnabled(cacheable=true)
-    public static List<Wrapper> getDailyInterventions() {
+    public static List<Wrapper> getDailyInterventions(String chosenDate) {
+        System.debug('chosenDate: ' + chosenDate);
+        System.debug('date format: ' + date.valueOf(chosenDate));
+
+
         List<Intervention__c> interventions = [SELECT Id, Account__r.CustomerCode__c, Name, Account__r.BillingPostalCode, Account__r.AccountingBalance__c, StartDate__c, Type__c, Qualification__c, TemporaryTechnician__r.Name, InterventionDescription__c
             FROM Intervention__c
+            WHERE StartDate__c >= :date.valueOf(chosenDate) AND StartDate__c < :date.valueOf(chosenDate).addDays(1)
             WITH SECURITY_ENFORCED 
         ];
+        System.debug('lets see our string chosenDate:' + chosenDate);
+
         List<Wrapper> response = new List<Wrapper>();
         for(Intervention__c intervention: interventions){
             Wrapper wrapper = new Wrapper();
@@ -22,6 +29,7 @@ public with sharing class DailyInterventionController {
             wrapper.description = intervention.InterventionDescription__c;
             response.add(wrapper);
         }
+        System.debug('see the response?' + response);
         return response;
     }
 
