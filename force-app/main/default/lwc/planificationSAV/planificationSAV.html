@@ -46,8 +46,8 @@
                                                 value="1"></lightning-input>
                                         </li>
                                         <li class="li-3 slds-button-group-item">
-                                            <lightning-input type="radio" label="Jour" name="options"
-                                                value="1"></lightning-input>
+                                            <lightning-input type="radio" label="Jour" name="options" 
+                                                value={value}></lightning-input>
                                         </li>
                                     </ul>
                                 </lightning-layout-item>
@@ -65,7 +65,7 @@
                                                 class="slds-text-align_center slds-m-right_x-small slds-m-left_x-small">
                                                 <lightning-input type="date" variant="label-hidden"
                                                     name="input1" label="Enter a date" date-style="short" value={dateDisplay} 
-                                                    onchange={today} >
+                                                    onchange={handleDateChange} onclick={todaysInterventions}>
                                                 </lightning-input>
                                             </div>
 
@@ -163,7 +163,7 @@
                                 <lightning-layout-item padding="horizontal-medium" size="6"
                                     small-device-size="12" medium-device-size="6" large-device-size="6">
                                     <div class="client-details">
-                                        <div class="slds-float_right"></div>
+                                        <!-- <div class="slds-float_right"></div> -->
                                         <lightning-card title="Client" icon-name="standard:account"
                                             variant="base">
                                             <div slot="actions">
@@ -236,8 +236,18 @@
                                         </lightning-card>
                                     </div>
                                 </lightning-layout-item>
-                                <lightning-card title="Description Intervention"
-                                    icon-name="standard:maintenance_asset" variant="base">
+                                <lightning-card title="Description Intervention" icon-name="standard:maintenance_asset" variant="base">
+                                    <div slot="actions">
+                                        <ul class="slds-button-group-row">
+                                            <li class="slds-button-group-item">
+                                                <lightning-button-icon icon-name="utility:search"
+                                                    onclick={navigateToIntervention}
+                                                    variant="border-filled" alternative-text="view"
+                                                    size="medium">
+                                                </lightning-button-icon>
+                                            </li>
+                                        </ul>
+                                    </div>
                                     <div class="slds-card__body_inner">
                                         <lightning-layout class=" " multiple-rows="true">
                                             <lightning-layout-item>
