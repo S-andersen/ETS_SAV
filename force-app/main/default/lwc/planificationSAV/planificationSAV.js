@@ -10,30 +10,72 @@ const COLUMNS = [
   { label: "Details", fieldName: "Type__c", type: "text" }
 ];
 
-export default class planificationSAV extends NavigationMixin(
-  LightningElement
-) {
+export default class planificationSAV extends NavigationMixin(LightningElement) {
+
+
+  allInterventionsList;
   today;
-  rowCount;
   nrAppareils;
   intervention;
   lstAppareil;
   columns = COLUMNS;
-  index;
-  value=''; 
-
-  @track
-  dailyInterventions;
+  index; 
   dateDisplay;
   currentDate;
+  value = 'JOUR';
 
+  @track dailyInterventions;
+  @track rowCount;
+  
+
+  // this method updates the table based on which radio button is checked 
   get options(){
     return [
-      {label: 'AM', value: 'option1'},
-      {label: 'PM', value: 'option2'},
-      {label: 'JOUR', value: 'option3'}
+      {label: 'JOUR', value: 'JOUR'},
+      {label: 'AM', value: 'AM'},
+      {label: 'PM', value: 'PM'}
     ];
   }
+
+  @track optionJOUR = true;
+  @track optionAM = false;
+  @track optionPM = false; 
+   
+
+  handleRadioChange(event) {
+    const selectedOption = event.detail.value;
+
+    if(selectedOption == 'AM'){
+      this.optionAM = true;
+      this.dailyInterventions = this.allInterventionsList.filter(interv =>
+        parseFloat(interv.interventionTime.replace(':', '.')) < 12.00);
+      this.rowCount = this.dailyInterventions.length;   
+     
+
+    }else{
+      this.optionAM = false;
+    }
+
+    if(selectedOption == 'PM'){
+      console.log('PM click');
+      this.optionPM = true;
+      this.dailyInterventions = this.allInterventionsList.filter(interv =>
+        parseFloat(interv.interventionTime.replace(':', '.')) >= 12.00);
+        this.rowCount = this.dailyInterventions.length;
+    }else{
+      this.optionPM = false;
+    }
+
+    if(selectedOption == 'JOUR'){
+      console.log('JOUR click');
+      this.optionJOUR = true; 
+      this.dailyInterventions = this.allInterventionsList; 
+      this.rowCount = this.dailyInterventions.length;
+
+    }else{
+      this.optionJOUR = false;
+    }
+}
 
   // This method retrieves the date in a french format
   connectedCallback() {
@@ -65,7 +107,8 @@ export default class planificationSAV extends NavigationMixin(
   @wire(getDailyInterventions, {chosenDate: new Date()})
   result(res) {
     if (res.data) {
-      this.dailyInterventions = res.data;
+      this.allInterventionsList = res.data;
+      this.dailyInterventions = this.allInterventionsList;
       this.rowCount = this.dailyInterventions.length;
 
       getInterventions({ interventionId: this.dailyInterventions[0].id })
@@ -150,7 +193,9 @@ export default class planificationSAV extends NavigationMixin(
 
     getDailyInterventions({chosenDate: testDateToday})
       .then(result => {
-        this.dailyInterventions = result;
+        this.allInterventionsList = result;
+        this.dailyInterventions = this.allInterventionsList;
+        this.rowCount = this.dailyInterventions.length;
         console.log(this.dailyInterventions);
       })
       .catch(error => {
@@ -162,4 +207,3 @@ export default class planificationSAV extends NavigationMixin(
   }
    
 }
-

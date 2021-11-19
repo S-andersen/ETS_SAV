@@ -32,24 +32,44 @@
                     <div class="div-3 slds-grid slds-gutters slds-clearfix layout-1">
                         <div class="slds-col slds-size_3-of-4">
                             <lightning-layout pull-to-boundary="medium" multiple-rows="true" class="layout-1">
-                                <lightning-layout-item padding="around-small" size="12"
+                                <lightning-layout-item padding="around-small" size="12" 
                                     small-device-size="12" medium-device-size="6" large-device-size="6">
-                                    <span class="span-2">Nombres de lignes: {rowCount}
-                                    </span>
-                                    <ul class="ul-1 slds-button-group-row">
+                                    <span class="span-2">Nombre de lignes: {rowCount}</span>
+                                    <div class="slds-button-group-row">
+                                        <div class="slds-grid slds-wrap" >
+                                            <lightning-radio-group 
+                                            options={options}
+                                            value={value}
+                                            type="radio"
+                                            onchange={handleRadioChange}
+                                            class="radio">
+                                            </lightning-radio-group>
+                                        </div>
+                                        <template if:true={optionAM}></template>
+                                        <template if:true={optionPM}></template>
+                                        <template if:true={optionJOUR}></template>
+                                        </div>
+                                    
+                                    <!-- <ul class="ul-1 slds-button-group-row">
                                         <li class="li-1 slds-button-group-item">
+                                            <template if:true={optionAM}>
                                             <lightning-input type="radio" label="AM" name="options"
-                                                value="1"></lightning-input>
+                                            value={AM} onchange={handleRadioChange}></lightning-input>
+                                        </template>
                                         </li>
                                         <li class="li-2 slds-button-group-item">
+                                            <template if:true={optionPM}>
                                             <lightning-input type="radio" label="PM" name="options"
-                                                value="1"></lightning-input>
+                                            value={PM} onchange={handleRadioChange}></lightning-input>
+                                        </template>
                                         </li>
                                         <li class="li-3 slds-button-group-item">
+                                            <template if:true={optionJOUR}>
                                             <lightning-input type="radio" label="Jour" name="options" 
-                                                value={value}></lightning-input>
+                                                value={JOUR} onchange={handleRadioChange}></lightning-input>
+                                            </template>
                                         </li>
-                                    </ul>
+                                    </ul> -->
                                 </lightning-layout-item>
                                 <lightning-layout-item padding="around-small">
                                     <lightning-layout>
@@ -60,7 +80,6 @@
                                                     class="button-1" icon-name="utility:back"
                                                     onclick={removeDays}></lightning-button>
                                             </div>
-
                                             <div
                                                 class="slds-text-align_center slds-m-right_x-small slds-m-left_x-small">
                                                 <lightning-input type="date" variant="label-hidden"
@@ -68,7 +87,6 @@
                                                     onchange={handleDateChange} onclick={todaysInterventions}>
                                                 </lightning-input>
                                             </div>
-
                                             <div class="slds-text-align_center">
                                                 <lightning-button label="Suivant" icon-position="right"
                                                     class="button-1" icon-name="utility:forward"
@@ -111,7 +129,6 @@
                                             <th scope="col" class="slds-cell-wrap slds-truncate"
                                                 title="Description">Description</th>
                                         </tr>
-
                                         <tbody>
                                             <template if:true={dailyInterventions} >
                                                 <template for:each={dailyInterventions}
