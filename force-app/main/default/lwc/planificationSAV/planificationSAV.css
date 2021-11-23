@@ -91,13 +91,15 @@
   padding: 15px; 
 }
 
-table {
+.Table-id {
   table-layout:auto;
   border-style:none;
   font-weight:normal;
   font-size: 16px;
   margin-left: auto;
   margin-right: auto;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(10px, 1fr));
 }
 
 th {
@@ -107,21 +109,17 @@ th {
   border: 1px rgb(180, 180, 180) solid;
 }
 
-td {
-  cursor:pointer;
-  max-width: 250px !important;
-}
-
-td.client {
-  color: rgba(145, 72, 0, 1);
-  text-decoration: underline;
-}
-
 td.right {
   text-align: right;
 }
 
 tr {
   border: 1px rgb(180, 180, 180) solid !important;
+  cursor:pointer
 }
 
+.radio{
+  /* display: inline-grid; */
+  grid-auto-flow: column;
+  grid-template-columns: repeat(auto-fit, minmax(min-content, 1fr));
+}

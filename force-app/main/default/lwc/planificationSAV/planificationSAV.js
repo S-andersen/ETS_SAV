@@ -27,53 +27,26 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
   @track dailyInterventions;
   @track rowCount;
   
-
-  // this method updates the table based on which radio button is checked 
-  get options(){
-    return [
-      {label: 'JOUR', value: 'JOUR'},
-      {label: 'AM', value: 'AM'},
-      {label: 'PM', value: 'PM'}
-    ];
-  }
-
-  @track optionJOUR = true;
-  @track optionAM = false;
-  @track optionPM = false; 
-   
-
   handleRadioChange(event) {
-    const selectedOption = event.detail.value;
-
+    const selectedOption = event.target.value;
+    
     if(selectedOption == 'AM'){
-      this.optionAM = true;
       this.dailyInterventions = this.allInterventionsList.filter(interv =>
         parseFloat(interv.interventionTime.replace(':', '.')) < 12.00);
       this.rowCount = this.dailyInterventions.length;   
-     
-
-    }else{
-      this.optionAM = false;
     }
 
     if(selectedOption == 'PM'){
       console.log('PM click');
-      this.optionPM = true;
       this.dailyInterventions = this.allInterventionsList.filter(interv =>
         parseFloat(interv.interventionTime.replace(':', '.')) >= 12.00);
         this.rowCount = this.dailyInterventions.length;
-    }else{
-      this.optionPM = false;
     }
 
     if(selectedOption == 'JOUR'){
       console.log('JOUR click');
-      this.optionJOUR = true; 
       this.dailyInterventions = this.allInterventionsList; 
       this.rowCount = this.dailyInterventions.length;
-
-    }else{
-      this.optionJOUR = false;
     }
 }
 
@@ -111,6 +84,7 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
       this.dailyInterventions = this.allInterventionsList;
       this.rowCount = this.dailyInterventions.length;
 
+      console.log('this is the list:' + this.dailyInterventions);
       getInterventions({ interventionId: this.dailyInterventions[0].id })
         .then(result => {
           let tmp = JSON.parse(JSON.stringify(result));

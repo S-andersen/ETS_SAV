@@ -30,46 +30,24 @@
                 </lightning-layout-item>
                 <div class="div-1">
                     <div class="div-3 slds-grid slds-gutters slds-clearfix layout-1">
-                        <div class="slds-col slds-size_3-of-4">
+                        <div class="slds-col slds-size_3-of-4 radio">
                             <lightning-layout pull-to-boundary="medium" multiple-rows="true" class="layout-1">
                                 <lightning-layout-item padding="around-small" size="12" 
                                     small-device-size="12" medium-device-size="6" large-device-size="6">
                                     <span class="span-2">Nombre de lignes: {rowCount}</span>
-                                    <div class="slds-button-group-row">
-                                        <div class="slds-grid slds-wrap" >
-                                            <lightning-radio-group 
-                                            options={options}
-                                            value={value}
-                                            type="radio"
-                                            onchange={handleRadioChange}
-                                            class="radio">
-                                            </lightning-radio-group>
-                                        </div>
-                                        <template if:true={optionAM}></template>
-                                        <template if:true={optionPM}></template>
-                                        <template if:true={optionJOUR}></template>
-                                        </div>
-                                    
-                                    <!-- <ul class="ul-1 slds-button-group-row">
+                                    <ul class="ul-1 slds-button-group-row">
                                         <li class="li-1 slds-button-group-item">
-                                            <template if:true={optionAM}>
-                                            <lightning-input type="radio" label="AM" name="options"
-                                            value={AM} onchange={handleRadioChange}></lightning-input>
-                                        </template>
+                                            <lightning-input type="radio" label="AM" name="time" value="AM" id="radioAM" onchange={handleRadioChange}></lightning-input>
                                         </li>
                                         <li class="li-2 slds-button-group-item">
-                                            <template if:true={optionPM}>
-                                            <lightning-input type="radio" label="PM" name="options"
-                                            value={PM} onchange={handleRadioChange}></lightning-input>
-                                        </template>
+                                            <lightning-input type="radio" label="PM" name="time"
+                                            value="PM" id="radioPM" onchange={handleRadioChange}></lightning-input>
                                         </li>
                                         <li class="li-3 slds-button-group-item">
-                                            <template if:true={optionJOUR}>
-                                            <lightning-input type="radio" label="Jour" name="options" 
-                                                value={JOUR} onchange={handleRadioChange}></lightning-input>
-                                            </template>
+                                            <lightning-input type="radio" label="Jour" name="time" checked
+                                                value="JOUR" id="radioJOUR" onchange={handleRadioChange}></lightning-input>
                                         </li>
-                                    </ul> -->
+                                    </ul>
                                 </lightning-layout-item>
                                 <lightning-layout-item padding="around-small">
                                     <lightning-layout>
@@ -101,13 +79,13 @@
                                     <table id="Table-id"
                                         class="slds-table 
                                         slds-max-medium-table_stacked-horizontal slds-table_fixed-layout">
-                                        <tr>
-                                            <th scope="col" class="slds-truncate"
+                                        <tr class="slds-icon-utility-arrowdown slds-is-sortable .slds-is-sorted_asc">
+                                            <th scope="col" class="slds-truncate slds-icon-utility-arrowdown slds-is-sortable .slds-is-sorted_asc"
                                                 title="Client">Client</th>
-                                            <th scope="col" class="slds-truncate"
+                                            <th scope="col" class="slds-truncate slds-icon-utility-arrowdown slds-is-sortable .slds-is-sorted_asc"
                                                 title="Nom">
                                                 Nom</th>
-                                            <th scope="col" class="slds-truncate"
+                                            <th scope="col" class="slds-truncate slds-icon-utility-arrowdown slds-is-sortable .slds-is-sorted_asc"
                                                 title="CP">CP
                                             </th>
                                             <th scope="col" class="slds-truncate"
@@ -129,42 +107,43 @@
                                             <th scope="col" class="slds-cell-wrap slds-truncate"
                                                 title="Description">Description</th>
                                         </tr>
+                                    
                                         <tbody>
                                             <template if:true={dailyInterventions} >
                                                 <template for:each={dailyInterventions}
                                                     for:item="interv" for:index="index">
-                                                    <tr class="slds-card slds-card_boundary tableRows" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:300px;"
-                                                        key={interv.id} >
+                                                    <tr class="slds-card slds-card_boundary tableRows" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;"
+                                                        key={interv.id} data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}>
                                                         <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate client">
                                                             {interv.client}</td>
-                                                        <td scope="row"
+                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.nom}</td>
-                                                        <td scope="row"
+                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.cp}</td>
-                                                        <td scope="row"
+                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate right">
                                                             {interv.solde}</td>
-                                                        <td scope="row"
+                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.interventionDate}
                                                         </td>
-                                                        <td scope="row"
+                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.interventionTime}
                                                         </td>
-                                                        <td scope="row"
+                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.type}</td>
-                                                        <td scope="row"
+                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.qualification}</td>
-                                                        <td scope="row"
+                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.technicien}</td>
-                                                        <td scope="row" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:500px;"
+                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount} style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:500px !important;"
                                                             class="slds-m-right_large">
                                                             {interv.description}</td>
                                                     </tr>
@@ -180,7 +159,6 @@
                                 <lightning-layout-item padding="horizontal-medium" size="6"
                                     small-device-size="12" medium-device-size="6" large-device-size="6">
                                     <div class="client-details">
-                                        <!-- <div class="slds-float_right"></div> -->
                                         <lightning-card title="Client" icon-name="standard:account"
                                             variant="base">
                                             <div slot="actions">

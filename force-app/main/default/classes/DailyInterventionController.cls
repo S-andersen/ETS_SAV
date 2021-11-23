@@ -6,7 +6,7 @@ public with sharing class DailyInterventionController {
         System.debug('date format: ' + date.valueOf(chosenDate));
 
 
-        List<Intervention__c> interventions = [SELECT Id, Account__r.CustomerCode__c, Name, Account__r.BillingPostalCode, Account__r.AccountingBalance__c, StartDate__c, Type__c, Qualification__c, TemporaryTechnician__r.Name, InterventionDescription__c
+        List<Intervention__c> interventions = [SELECT Id, Account__r.CustomerCode__c, Name, Account__r.BillingPostalCode, Account__r.AccountingBalance__c, StartDate__c, Type__c, Qualification__c, TemporaryTechnician__r.Alias, InterventionDescription__c
             FROM Intervention__c
             WHERE StartDate__c >= :date.valueOf(chosenDate) AND StartDate__c < :date.valueOf(chosenDate).addDays(1)
             WITH SECURITY_ENFORCED 
@@ -25,7 +25,7 @@ public with sharing class DailyInterventionController {
             wrapper.interventionTime = intervention.StartDate__c.format('HH:mm');
             wrapper.type = intervention.Type__c;
             wrapper.qualification = intervention.Qualification__c;
-            wrapper.technicien = intervention.TemporaryTechnician__r.Name;
+            wrapper.technicien = intervention.TemporaryTechnician__r.Alias;
             wrapper.description = intervention.InterventionDescription__c;
             response.add(wrapper);
         }
