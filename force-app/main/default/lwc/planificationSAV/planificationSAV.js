@@ -3,6 +3,7 @@ import getInterventions from "@salesforce/apex/InterventionController.getInterve
 import getDailyInterventions from "@salesforce/apex/DailyInterventionController.getDailyInterventions";
 import getAppareilForAccount from "@salesforce/apex/InterventionController.getAppareilForAccount";
 import { NavigationMixin } from "lightning/navigation";
+import SVG_LOGO from '@salesforce/resourceUrl/SVG_LOGO';
 
 const COLUMNS = [
   { label: "Code", fieldName: "APCode__c", type: "text" },
@@ -12,7 +13,10 @@ const COLUMNS = [
 
 export default class planificationSAV extends NavigationMixin(LightningElement) {
 
+  logo='logo';
+  svgURL = `${SVG_LOGO}#logo`
 
+  sortDirection = false;
   allInterventionsList;
   today;
   nrAppareils;
@@ -179,5 +183,37 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
         console.log('current value of the input detail: ' + JSON.stringify(event.detail));
 
   }
-   
+
+  sortColumn(event){
+
+  console.log('sortColumn element was clicked');
+  this.dailyInterventions = JSON.parse(JSON.stringify(this.dailyInterventions))
+
+  this.dailyInterventions.sort((a, b) => a.client.localeCompare(b.client));
+
+  }
+
+
+
+//  function sortColumn(columnName){
+//     const dataType = typeof interventionData[0][columnName];
+//     console.log(dataType);
+//     sortDirection = !sortDirection;
+
+//     switch(dataType){
+//       case 'string':
+//         sortStringColumn(sortDirection, columnName);
+//         break;
+//     }
+//     console.log('tableData: ' + tableData);
+
+//     loadTableData(interventionData);
+//   }
+
+//   function sortStringColumn(sort, columnName){
+//     interventionData = interventionData.sort((c1, c2) => {
+//       return sort ? c1[columnName] - c2[columnName] : c2[columnName] - c1[columnName]
+//     });
+//   }
+// }
 }
