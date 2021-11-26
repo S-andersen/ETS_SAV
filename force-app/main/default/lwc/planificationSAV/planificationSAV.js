@@ -3,7 +3,7 @@ import getInterventions from "@salesforce/apex/InterventionController.getInterve
 import getDailyInterventions from "@salesforce/apex/DailyInterventionController.getDailyInterventions";
 import getAppareilForAccount from "@salesforce/apex/InterventionController.getAppareilForAccount";
 import { NavigationMixin } from "lightning/navigation";
-import SVG_LOGO from '@salesforce/resourceUrl/SVG_LOGO';
+import edit from '@salesforce/resourceUrl/edit';
 
 const COLUMNS = [
   { label: "Code", fieldName: "APCode__c", type: "text" },
@@ -13,8 +13,8 @@ const COLUMNS = [
 
 export default class planificationSAV extends NavigationMixin(LightningElement) {
 
-  logo='logo';
-  svgURL = `${SVG_LOGO}#logo`
+  edit= edit + '#edit';
+  svgURL = `${edit}#edit`
 
   sortDirection = false;
   allInterventionsList;
@@ -30,6 +30,7 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
 
   @track dailyInterventions;
   @track rowCount;
+  // @track sortDirection = false; 
   
   handleRadioChange(event) {
     const selectedOption = event.target.value;
@@ -184,36 +185,59 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
 
   }
 
-  sortColumn(event){
+  
+  //this method sorts the columns in the main data table 
+  sortColumn(columnName){
 
-  console.log('sortColumn element was clicked');
-  this.dailyInterventions = JSON.parse(JSON.stringify(this.dailyInterventions))
+    let key = columnName.target.title.toLowerCase(); 
+    console.log('key: ' + key);
+    this.sortDirection = !this.sortDirection;
 
-  this.dailyInterventions.sort((a, b) => a.client.localeCompare(b.client));
+   if(key == 'heure'){
+    console.log('cas heure :');
+    key = "interventionTime";
+
+    this.dailyInterventions.sort((a, b) => {
+      return this.sortDirection? parseFloat(a[key].replace(':', '.')) - parseFloat(b[key].replace(':', '.')) : 
+      parseFloat(b[key].replace(':', '.')) - parseFloat(a[key].replace(':', '.'));
+    }); 
+   }  else {
+      const dataType = typeof this.dailyInterventions[0][key];
+      this.dailyInterventions = JSON.parse(JSON.stringify(this.dailyInterventions));
+
+      this.dailyInterventions.sort((a, b) => {
+        return this.sortDirection? a[key].localeCompare(b[key]) : b[key].localeCompare(a[key]) 
+      }); 
+  }
+  }
+
+  editTechnicien(event){
+
+    let rowIndex = event.target.dataset.index;
+    let pressEnter = event.keyCode; 
+
+    if (pressEnter == 13) { 
+            this.template.querySelectorAll("[data-index='"+rowIndex+"']").forEach(element => {
+        if(element.dataset.cell === 'cellTechnicien') {
+
+            console.log('valeur inner : ' + element.innerHTML);
+
+
+        }
+    });
+
+  
+    } else {
+    
+      console.log('do nothing!');
+    }
 
   }
 
+    richtext = 'hello';
 
+    handleChange(e) {
+        this.richtext = e.detail.value;
+    }
 
-//  function sortColumn(columnName){
-//     const dataType = typeof interventionData[0][columnName];
-//     console.log(dataType);
-//     sortDirection = !sortDirection;
-
-//     switch(dataType){
-//       case 'string':
-//         sortStringColumn(sortDirection, columnName);
-//         break;
-//     }
-//     console.log('tableData: ' + tableData);
-
-//     loadTableData(interventionData);
-//   }
-
-//   function sortStringColumn(sort, columnName){
-//     interventionData = interventionData.sort((c1, c2) => {
-//       return sort ? c1[columnName] - c2[columnName] : c2[columnName] - c1[columnName]
-//     });
-//   }
-// }
 }

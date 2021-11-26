@@ -9,7 +9,8 @@ public with sharing class DailyInterventionController {
         List<Intervention__c> interventions = [SELECT Id, Account__r.CustomerCode__c, Name, Account__r.BillingPostalCode, Account__r.AccountingBalance__c, StartDate__c, Type__c, Qualification__c, TemporaryTechnician__r.Alias, InterventionDescription__c
             FROM Intervention__c
             WHERE StartDate__c >= :date.valueOf(chosenDate) AND StartDate__c < :date.valueOf(chosenDate).addDays(1)
-            WITH SECURITY_ENFORCED 
+            ORDER BY StartDate__c
+            // WITH SECURITY_ENFORCED 
         ];
         System.debug('lets see our string chosenDate:' + chosenDate);
 

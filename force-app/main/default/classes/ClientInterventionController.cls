@@ -14,7 +14,8 @@ public with sharing class ClientInterventionController {
         List<Intervention__c> result = [
             SELECT Account__r.CustomerCode__c, Name, Account__r.ShippingPostalCode, Account__r.AccountingBalance__c, StartDate__c, Type__c, Qualification__c, ValidateTechnician__c, InterventionDescription__c
             FROM Intervention__c
-            WITH SECURITY_ENFORCED
+            ORDER BY StartDate__c ASC
+           
         ];
         List<Wrapper> wrapperList = new List<Wrapper>();
         for(Intervention__c clientIntervention: result){

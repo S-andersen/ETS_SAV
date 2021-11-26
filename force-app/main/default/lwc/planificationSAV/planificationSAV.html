@@ -22,12 +22,17 @@
 
                 <lightning-layout-item padding="horizontal-medium" size="12" small-device-size="12"
                     medium-device-size="6" large-device-size="6">
-                    <lightning-formatted-rich-text value="<span class=&quot;tabulation&quot;><strong>AA: </strong>1</span>
-<span class=&quot;tabulation&quot;><strong>AL: </strong>1</span>
-<span class=&quot;tabulation&quot;><strong>CC: </strong>0</span>
-<span class=&quot;tabulation&quot;><strong>GD: </strong>1</span>
-<span class=&quot;tabulation&quot;><strong>JV: </strong>0</span>"></lightning-formatted-rich-text>
+                    <lightning-formatted-rich-text value="
+                    <span class=&quot;tabulation&quot;><strong>AA: </strong>1</span>
+                    <span class=&quot;tabulation&quot;><strong>AL: </strong>1</span>
+                    <span class=&quot;tabulation&quot;><strong>CC: </strong>0</span>
+                    <span class=&quot;tabulation&quot;><strong>GD: </strong>1</span>
+                    <span class=&quot;tabulation&quot;><strong>JV: </strong>0</span>">
+                </lightning-formatted-rich-text>
                 </lightning-layout-item>
+
+             <lightning-formatted-rich-text value={richtext}></lightning-formatted-rich-text>
+
                 <div class="div-1">
                     <div class="div-3 slds-grid slds-gutters slds-clearfix layout-1">
                         <div class="slds-col slds-size_3-of-4 radio">
@@ -79,36 +84,37 @@
                                     <table id="Table-id"
                                         class="slds-table 
                                         slds-max-medium-table_stacked-horizontal slds-table_fixed-layout">
-                                        <tr class="slds-icon-utility-arrowdown slds-is-sortable .slds-is-sorted_asc">
-                                            <th scope="col" class="slds-truncate slds-icon-utility-arrowdown slds-is-sortable .slds-is-sorted_asc"
+                                        <tr class="slds-icon-utility-arrowdown slds-is-sortable slds-is-sorted_asc">
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate slds-icon-utility-arrowdown slds-is-sortable slds-is-sorted_asc"
                                                 title="Client">Client</th>
-                                            <th scope="col" class="slds-truncate slds-icon-utility-arrowdown slds-is-sortable .slds-is-sorted_asc"
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate slds-icon-utility-arrowdown slds-is-sortable slds-is-sorted_asc"
                                                 title="Nom">
-                                                Nom</th>
-                                            <th scope="col" class="slds-truncate slds-icon-utility-arrowdown slds-is-sortable .slds-is-sorted_asc"
+                                                Nom
+                                        </th>
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate slds-icon-utility-arrowdown slds-is-sortable slds-is-sorted_asc"
                                                 title="CP">CP
                                             </th>
-                                            <th scope="col" class="slds-truncate"
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate"
                                                 title="Solde">
                                                 Solde</th>
                                             <th scope="col" class="slds-truncate"
                                                 title="Date">
                                                 Date</th>
-                                            <th scope="col" class="slds-truncate"
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate"
                                                 title="Heure">
                                                 Heure</th>
-                                            <th scope="col" class="slds-truncate"
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate"
                                                 title="Type">
                                                 Type</th>
-                                            <th scope="col" class="slds-truncate"
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate"
                                                 title="Qualification">Qualification</th>
-                                            <th scope="col" class="slds-truncate"
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate"
                                                 title="Technicien">Technicien</th>
-                                            <th scope="col" class="slds-cell-wrap slds-truncate"
+                                            <th scope="col" onclick={sortColumn} class="slds-cell-wrap slds-truncate"
                                                 title="Description">Description</th>
                                         </tr>
                                     
-                                        <tbody>
+                                        <tbody id="tableData">
                                             <template if:true={dailyInterventions} >
                                                 <template for:each={dailyInterventions}
                                                     for:item="interv" for:index="index">
@@ -140,10 +146,10 @@
                                                         <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.qualification}</td>
-                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
-                                                            class="slds-truncate">
-                                                            {interv.technicien}</td>
-                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount} style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:500px !important;"
+                                                        <td scope="row" data-index={index} data-current={interv.id} data-cell="cellTechnicien" onkeypress={editTechnicien} ondblclick={navigateToAccount} contenteditable="true"
+                                                            id={techInput} class="slds-truncate slds-cell-edit">{interv.technicien}
+                                                        </td>                                                        
+                                                        <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount} style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;"
                                                             class="slds-m-right_large">
                                                             {interv.description}</td>
                                                     </tr>
