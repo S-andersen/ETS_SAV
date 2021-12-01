@@ -19,19 +19,21 @@
 </br>
 <strong>absent(s):</strong>"></lightning-formatted-rich-text>
                 </lightning-layout-item>
-
                 <lightning-layout-item padding="horizontal-medium" size="12" small-device-size="12"
                     medium-device-size="6" large-device-size="6">
-                    <lightning-formatted-rich-text value="
-                    <span class=&quot;tabulation&quot;><strong>AA: </strong>1</span>
-                    <span class=&quot;tabulation&quot;><strong>AL: </strong>1</span>
-                    <span class=&quot;tabulation&quot;><strong>CC: </strong>0</span>
-                    <span class=&quot;tabulation&quot;><strong>GD: </strong>1</span>
-                    <span class=&quot;tabulation&quot;><strong>JV: </strong>0</span>">
-                </lightning-formatted-rich-text>
+                    <p>
+                        <span class=&quot;tabulation&quot;><strong>AA: </strong></span>
+                        <lightning-formatted-text id="alias0" value={handletech}></lightning-formatted-text>
+                        <span class=&quot;tabulation&quot;><strong>AL: </strong></span>
+                        <lightning-formatted-text id="alias1" value={handletech}></lightning-formatted-text>
+                        <span class=&quot;tabulation&quot;><strong>CC: </strong></span>
+                        <lightning-formatted-text id="alias2" value={handletech}></lightning-formatted-text>
+                        <span class=&quot;tabulation&quot;><strong>GD: </strong></span>
+                        <lightning-formatted-text id="alias3" value={handletech}></lightning-formatted-text>
+                        <span class=&quot;tabulation&quot;><strong>JV: </strong></span>
+                        <lightning-formatted-text id="alias4" value={handletech}></lightning-formatted-text>
+                    </p>
                 </lightning-layout-item>
-
-             <lightning-formatted-rich-text value={richtext}></lightning-formatted-rich-text>
 
                 <div class="div-1">
                     <div class="div-3 slds-grid slds-gutters slds-clearfix layout-1">
@@ -146,9 +148,9 @@
                                                         <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.qualification}</td>
-                                                        <td scope="row" data-index={index} data-current={interv.id} data-cell="cellTechnicien" onkeypress={editTechnicien} ondblclick={navigateToAccount} contenteditable="true"
+                                                        <td scope="row" data-index={index} data-current={interv.id} data-cell="cellTechnicien" onkeypress={editTechnicien} ondblclick={navigateToAccount} contenteditable="true" 
                                                             id={techInput} class="slds-truncate slds-cell-edit">{interv.technicien}
-                                                        </td>                                                        
+                                                        </td>  
                                                         <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount} style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;"
                                                             class="slds-m-right_large">
                                                             {interv.description}</td>

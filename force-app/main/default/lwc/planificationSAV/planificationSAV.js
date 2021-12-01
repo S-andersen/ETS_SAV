@@ -4,6 +4,7 @@ import getDailyInterventions from "@salesforce/apex/DailyInterventionController.
 import getAppareilForAccount from "@salesforce/apex/InterventionController.getAppareilForAccount";
 import { NavigationMixin } from "lightning/navigation";
 import edit from '@salesforce/resourceUrl/edit';
+import StayInTouchNote from "@salesforce/schema/User.StayInTouchNote";
 
 const COLUMNS = [
   { label: "Code", fieldName: "APCode__c", type: "text" },
@@ -13,8 +14,6 @@ const COLUMNS = [
 
 export default class planificationSAV extends NavigationMixin(LightningElement) {
 
-  edit= edit + '#edit';
-  svgURL = `${edit}#edit`
 
   sortDirection = false;
   allInterventionsList;
@@ -30,7 +29,7 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
 
   @track dailyInterventions;
   @track rowCount;
-  // @track sortDirection = false; 
+  @track newValue; 
   
   handleRadioChange(event) {
     const selectedOption = event.target.value;
@@ -213,31 +212,39 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
 
   editTechnicien(event){
 
+
     let rowIndex = event.target.dataset.index;
+    let previousValue = this.dailyInterventions[rowIndex].technicien;
+    console.log('previous Value: ' + previousValue);
     let pressEnter = event.keyCode; 
 
     if (pressEnter == 13) { 
+      event.preventDefault();
             this.template.querySelectorAll("[data-index='"+rowIndex+"']").forEach(element => {
         if(element.dataset.cell === 'cellTechnicien') {
-
-            console.log('valeur inner : ' + element.innerHTML);
+          if(element.innerHTML.length == 2){
+            let newValue = element.innerHTML; 
+            console.log('new value: ' + newValue)
+          } else{
+            
+            element.innerHTML = previousValue; 
+            console.log('element prev value ' + element.innerHTML);
+          }
 
 
         }
-    });
-
-  
+    }); 
     } else {
+
     
       console.log('do nothing!');
     }
-
   }
 
-    richtext = 'hello';
+  handletech = '0 ';
 
     handleChange(e) {
-        this.richtext = e.detail.value;
+        this.handletech = e.detail.value;
     }
 
-}
+  }
