@@ -3,7 +3,7 @@
         <div slot="footer">
             <lightning-button-group>
                 <lightning-button variant="brand" label="Valider" value={enterValueHere}
-                    onclick={handleBtnValiderClick}></lightning-button>
+                    onclick={handleClick}></lightning-button>
             </lightning-button-group>
         </div>
 
@@ -148,12 +148,14 @@
                                                         <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.qualification}</td>
-                                                        <td scope="row" data-index={index} data-current={interv.id} data-cell="cellTechnicien" onkeypress={editTechnicien} ondblclick={navigateToAccount} contenteditable="true" 
-                                                            id={techInput} class="slds-truncate slds-cell-edit">{interv.technicien}
+                                                        <td scope="row" 
+                                                             class="slds-truncate" data-index={index} data-current={interv.id}>
+                                                            <input type="text" value={interv.technicien} id={techInput} class="techInput slds-m-around_none" maxlength="2" data-index={index} data-current={interv.id} data-cell="cellTechnicien"
+                                                             onchange={newMethod} name="techInput"></input>
                                                         </td>  
                                                         <td scope="row" data-index={index} data-current={interv.id} onclick={showIntervention} ondblclick={navigateToAccount} style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;"
                                                             class="slds-m-right_large">
-                                                            {interv.description}</td>
+                                                            {interv.description}</td> 
                                                     </tr>
                                                 </template>
                                             </template>

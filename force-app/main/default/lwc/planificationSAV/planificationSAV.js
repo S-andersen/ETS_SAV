@@ -1,10 +1,9 @@
-import { LightningElement, wire, track } from "lwc";
+import { LightningElement, wire, track, api } from "lwc";
 import getInterventions from "@salesforce/apex/InterventionController.getInterventions";
 import getDailyInterventions from "@salesforce/apex/DailyInterventionController.getDailyInterventions";
 import getAppareilForAccount from "@salesforce/apex/InterventionController.getAppareilForAccount";
 import { NavigationMixin } from "lightning/navigation";
-import edit from '@salesforce/resourceUrl/edit';
-import StayInTouchNote from "@salesforce/schema/User.StayInTouchNote";
+import { updateRecord } from "lightning/uiRecordApi";
 
 const COLUMNS = [
   { label: "Code", fieldName: "APCode__c", type: "text" },
@@ -26,10 +25,87 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
   dateDisplay;
   currentDate;
   value = 'JOUR';
+  
 
   @track dailyInterventions;
   @track rowCount;
   @track newValue; 
+
+  @api recordId; 
+  name; 
+  techInput; 
+  
+
+  //this method allows the user to update the technicien field
+  newMethod(event){
+
+    let rowIndex = event.target.dataset.index;
+    let newValue = event.target.value; 
+
+    if (event.target.name === "techInput") {
+      console.log('aaaaaaaaaaaaa');
+      console.log(this.dailyInterventions[rowIndex]);
+      console.log(this.dailyInterventions[rowIndex].technicien);
+      console.log('new' + newValue); 
+
+      this.dailyInterventions[rowIndex].technicien = newValue; 
+    
+console.log('list daily' + this.dailyInterventions);
+      
+
+    } else {
+      //do something / for now, just logging something
+      console.log('this didnt work...'); 
+    }
+  }
+
+  handleClick(){
+
+    // example taken from here: https://blog.salesforcecasts.com/how-to-use-updaterecord-in-lwc/ 
+
+    // const fields = {}; 
+
+    // fields[ID_FIELD.fieldApiName] = this.recordId; 
+    // fields[NAME_FIELD.fieldApiName] = this.name;
+
+    // const recordInput = {
+    //   fields: fields
+    // }; 
+
+    // updateRecord(recordInput).then((record) => {
+    //   console.log(record);
+    // });
+
+  }
+
+// this method isn't used anymore because I used it on a <td> but now I'm using an <input>
+   // editTechnicien(event){
+
+  //   let rowIndex = event.target.dataset.index;
+  //   let previousValue = this.dailyInterventions[rowIndex].technicien;
+  //   console.log('previous Value: ' + previousValue);
+  //   let pressEnter = event.keyCode; 
+
+  //   if (pressEnter == 13) { 
+  //     event.preventDefault();
+  //           this.template.querySelectorAll("[data-index='"+rowIndex+"']").forEach(element => {
+  //       if(element.dataset.cell === 'cellTechnicien') {
+  //         if(element.innerHTML.length == 2){
+  //           let newValue = element.innerHTML; 
+  //           console.log('new value: ' + newValue)
+  //         } else{
+            
+  //           element.innerHTML = previousValue; 
+  //           console.log('element prev value ' + element.innerHTML);
+  //         }
+  //       }
+  //   }); 
+  //   } else {
+  //     console.log('do nothing!');
+  //   }
+  // }
+
+  
   
   handleRadioChange(event) {
     const selectedOption = event.target.value;
@@ -57,6 +133,12 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
   // This method retrieves the date in a french format
   connectedCallback() {
     this.setDate();
+    /*if(this.dailyInterventions){
+      this.dailyInterventions.forEach((interv,index) => {
+        var intervTech = this.template.querySelector('input[data-index="'+index+'"]');
+        intervTech.addEventListener('input',this.changeTechnicien);
+      });
+    }*/
   }
 
   addDays() {
@@ -209,42 +291,4 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
       }); 
   }
   }
-
-  editTechnicien(event){
-
-
-    let rowIndex = event.target.dataset.index;
-    let previousValue = this.dailyInterventions[rowIndex].technicien;
-    console.log('previous Value: ' + previousValue);
-    let pressEnter = event.keyCode; 
-
-    if (pressEnter == 13) { 
-      event.preventDefault();
-            this.template.querySelectorAll("[data-index='"+rowIndex+"']").forEach(element => {
-        if(element.dataset.cell === 'cellTechnicien') {
-          if(element.innerHTML.length == 2){
-            let newValue = element.innerHTML; 
-            console.log('new value: ' + newValue)
-          } else{
-            
-            element.innerHTML = previousValue; 
-            console.log('element prev value ' + element.innerHTML);
-          }
-
-
-        }
-    }); 
-    } else {
-
-    
-      console.log('do nothing!');
-    }
-  }
-
-  handletech = '0 ';
-
-    handleChange(e) {
-        this.handletech = e.detail.value;
-    }
-
   }

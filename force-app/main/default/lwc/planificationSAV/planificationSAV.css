@@ -124,3 +124,7 @@ tr {
   /* grid-template-columns: repeat(auto-fit, minmax(min-content, 3fr)); */
   grid-template-columns: minmax(50px, 200px)1fr 1fr;
 }
+input{
+border-style: none;
+  
+}
