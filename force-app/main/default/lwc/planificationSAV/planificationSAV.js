@@ -6,289 +6,268 @@ import { NavigationMixin } from "lightning/navigation";
 import { updateRecord } from "lightning/uiRecordApi";
 
 const COLUMNS = [
-  { label: "Code", fieldName: "APCode__c", type: "text" },
-  { label: "Nom", fieldName: "Name", type: "text" },
-  { label: "Details", fieldName: "Type__c", type: "text" }
+    { label: "Code", fieldName: "APCode__c", type: "text" },
+    { label: "Nom", fieldName: "Name", type: "text" },
+    { label: "Details", fieldName: "Type__c", type: "text" }
 ];
 
+
+Date.prototype.addDays = function (days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+};
+Date.prototype.minusDays = function (days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() - days);
+    return date;
+};
+
 export default class planificationSAV extends NavigationMixin(LightningElement) {
+    @track PostingDate;
+    @track dateDisplay
 
-
-  sortDirection = false;
-  allInterventionsList;
-  today;
-  nrAppareils;
-  intervention;
-  lstAppareil;
-  columns = COLUMNS;
-  index; 
-  dateDisplay;
-  currentDate;
-  value = 'JOUR';
-  
-
-  @track dailyInterventions;
-  @track rowCount;
-  @track newValue; 
-
-  @api recordId; 
-  name; 
-  techInput; 
-  
-
-  //this method allows the user to update the technicien field
-  newMethod(event){
-
-    let rowIndex = event.target.dataset.index;
-    let newValue = event.target.value; 
-
-    if (event.target.name === "techInput") {
-      console.log('aaaaaaaaaaaaa');
-      console.log(this.dailyInterventions[rowIndex]);
-      console.log(this.dailyInterventions[rowIndex].technicien);
-      console.log('new' + newValue); 
-
-      this.dailyInterventions[rowIndex].technicien = newValue; 
-    
-console.log('list daily' + this.dailyInterventions);
-      
-
-    } else {
-      //do something / for now, just logging something
-      console.log('this didnt work...'); 
-    }
-  }
-
-  handleClick(){
-
-    // example taken from here: https://blog.salesforcecasts.com/how-to-use-updaterecord-in-lwc/ 
-
-    // const fields = {}; 
-
-    // fields[ID_FIELD.fieldApiName] = this.recordId; 
-    // fields[NAME_FIELD.fieldApiName] = this.name;
-
-    // const recordInput = {
-    //   fields: fields
-    // }; 
-
-    // updateRecord(recordInput).then((record) => {
-    //   console.log(record);
-    // });
-
-  }
-
-// this method isn't used anymore because I used it on a <td> but now I'm using an <input>
-   // editTechnicien(event){
-
-  //   let rowIndex = event.target.dataset.index;
-  //   let previousValue = this.dailyInterventions[rowIndex].technicien;
-  //   console.log('previous Value: ' + previousValue);
-  //   let pressEnter = event.keyCode; 
-
-  //   if (pressEnter == 13) { 
-  //     event.preventDefault();
-  //           this.template.querySelectorAll("[data-index='"+rowIndex+"']").forEach(element => {
-  //       if(element.dataset.cell === 'cellTechnicien') {
-  //         if(element.innerHTML.length == 2){
-  //           let newValue = element.innerHTML; 
-  //           console.log('new value: ' + newValue)
-  //         } else{
-            
-  //           element.innerHTML = previousValue; 
-  //           console.log('element prev value ' + element.innerHTML);
-  //         }
-  //       }
-  //   }); 
-  //   } else {
-  //     console.log('do nothing!');
-  //   }
-  // }
-
-  
-  
-  handleRadioChange(event) {
-    const selectedOption = event.target.value;
-    
-    if(selectedOption == 'AM'){
-      this.dailyInterventions = this.allInterventionsList.filter(interv =>
-        parseFloat(interv.interventionTime.replace(':', '.')) < 12.00);
-      this.rowCount = this.dailyInterventions.length;   
+    async connectedCallback() {
+        this.PostingDate = new Date();
+        this.dateDisplay = this.PostingDate.toISOString();
+        this.postingDateChange();
     }
 
-    if(selectedOption == 'PM'){
-      console.log('PM click');
-      this.dailyInterventions = this.allInterventionsList.filter(interv =>
-        parseFloat(interv.interventionTime.replace(':', '.')) >= 12.00);
-        this.rowCount = this.dailyInterventions.length;
-    }
 
-    if(selectedOption == 'JOUR'){
-      console.log('JOUR click');
-      this.dailyInterventions = this.allInterventionsList; 
-      this.rowCount = this.dailyInterventions.length;
-    }
-}
+    sortDirection = false;
+    allInterventionsList;
+    today;
+    nrAppareils;
+    intervention;
+    lstAppareil;
+    columns = COLUMNS;
+    index;
 
-  // This method retrieves the date in a french format
-  connectedCallback() {
-    this.setDate();
-    /*if(this.dailyInterventions){
-      this.dailyInterventions.forEach((interv,index) => {
-        var intervTech = this.template.querySelector('input[data-index="'+index+'"]');
-        intervTech.addEventListener('input',this.changeTechnicien);
-      });
-    }*/
-  }
 
-  addDays() {
-    this.setDate(1);
-    let event = {'detail': {'value': this.dateDisplay}}
-    this.handleDateChange(event);
-  }
 
-  removeDays() {
-    this.setDate(-1);
-    let event = {'detail': {'value': this.dateDisplay}}
-    this.handleDateChange(event); 
-  }
+    value = 'JOUR';
+    listAlias = [{ name: "TT: ", nr: "0" }];
 
-  setDate(days) {
-    if (!days) {
-      this.currentDate = new Date();
-    } else {
-      this.currentDate.setDate(this.currentDate.getDate() + days);
-    }
-    this.dateDisplay = this.currentDate.toISOString().split("T")[0];
-  }
 
-  // this method retrieves information of all daily interventions which are visible in the main UI table
-  @wire(getDailyInterventions, {chosenDate: new Date()})
-  result(res) {
-    if (res.data) {
-      this.allInterventionsList = res.data;
-      this.dailyInterventions = this.allInterventionsList;
-      this.rowCount = this.dailyInterventions.length;
 
-      console.log('this is the list:' + this.dailyInterventions);
-      getInterventions({ interventionId: this.dailyInterventions[0].id })
-        .then(result => {
-          let tmp = JSON.parse(JSON.stringify(result));
-          tmp.customerCode = tmp.Account__r.CustomerCode__c;
-          this.intervention = tmp;
-          console.log(this.intervention);
+    @track dailyInterventions;
+    @track rowCount;
+    @track newValue;
 
-          getAppareilForAccount({ accountId: this.intervention.Account__c })
-            .then(result => {
-              this.lstAppareil = result;
-              this.nrAppareils = this.lstAppareil.length;
-              console.log(this.lstAppareil);
+    @api recordId;
+    name;
+    techInput;
+
+    postingDateChange() {
+        console.log('test');
+        getDailyInterventions({ chosenDate: this.PostingDate })
+            .then(res => {
+                console.log('test 2 ' + res);
+                if (res) {
+                    this.allInterventionsList = res;
+                    this.dailyInterventions = this.allInterventionsList;
+                    this.rowCount = this.dailyInterventions.length;
+
+                    console.log('this is the list:' + this.dailyInterventions);
+                    getInterventions({ interventionId: this.dailyInterventions[0].id })
+                        .then(result => {
+                            let tmp = JSON.parse(JSON.stringify(result));
+                            tmp.customerCode = tmp.Account__r.CustomerCode__c;
+                            this.intervention = tmp;
+                            console.log(this.intervention);
+
+                            getAppareilForAccount({ accountId: this.intervention.Account__c })
+                                .then(result => {
+                                    this.lstAppareil = result;
+                                    this.nrAppareils = this.lstAppareil.length;
+                                    console.log(this.lstAppareil);
+                                })
+                                .catch(error => {
+                                    console.log(error);
+                                });
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+                }
             })
             .catch(error => {
-              console.log(error);
-            });
-        })
-        .catch(error => {
-          console.log(error);
-        });
+                console.log(error);
+            })
     }
-  }
 
-  // this method retrieves allows the user to navigate to the Account page by clicking the search icon
-  navigateToAccount() {
-    this[NavigationMixin.Navigate]({
-      type: "standard__recordPage",
-      attributes: {
-        recordId: this.intervention.Account__c,
-        objectApiName: "Account",
-        actionName: "view"
-      }
-    });
-  }
+    //this method allows the user to update the technicien field
+    updateAlias(event) {
 
-  // this method retrieves allows the user to navigate to the Intervention page by clicking the search icon
-  navigateToIntervention() {
-    this[NavigationMixin.Navigate]({
-      type: "standard__recordPage",
-      attributes: {
-        recordId: this.intervention,
-        objectApiName: "Intervention__c",
-        actionName: "view"
-      }
-    });
-  }
+        let rowIndex = event.target.dataset.index;
+        let newArray = [...this.dailyInterventions];
 
-  // this method updates the client and intervention card on the right hand side,
-  // when the client code in the main table has been clicked.
-  // By default the first intervention in the main table is shown.
-  showIntervention(event) {
-    console.log("intervention Id:" + event.target.dataset.current);
 
-    getInterventions({ interventionId: event.target.dataset.current })
-      .then(result => {
-        let tmp = JSON.parse(JSON.stringify(result));
-        tmp.customerCode = tmp.Account__r.CustomerCode__c;
-        this.intervention = tmp;
-        console.log(this.intervention);
+        console.log('listAlias' + this.listAlias);
 
-        getAppareilForAccount({ accountId: this.intervention.Account__c })
-          .then(result => {
-            this.lstAppareil = result;
-            this.nrAppareils = this.lstAppareil.length;
-            console.log(this.lstAppareil);
-          })
-          .catch(error => {
-            console.log(error);
-          });
-      })
+        if (event.target.name === "techInput") {
+            let updatedRow = { ...newArray[rowIndex], ['technicien']: event.target.value };
+            newArray[rowIndex] = updatedRow;
+        }
 
-      .catch(error => {
-        console.log(error);
-      });
-  }
+        this.dailyInterventions = newArray;
 
-  handleDateChange(event){
-    
-    let testDateToday = event.detail.value; 
+    }
 
-    getDailyInterventions({chosenDate: testDateToday})
-      .then(result => {
-        this.allInterventionsList = result;
-        this.dailyInterventions = this.allInterventionsList;
-        this.rowCount = this.dailyInterventions.length;
-        console.log(this.dailyInterventions);
-      })
-      .catch(error => {
-        console.log(error);
-      });
+    // handleClick(event){
+
+    //   // example taken from here: https://blog.salesforcecasts.com/how-to-use-updaterecord-in-lwc/ 
+
+    //   // const fields = {}; 
+
+    //   // fields[ID_FIELD.fieldApiName] = this.recordId; 
+    //   // fields[NAME_FIELD.fieldApiName] = this.name;
+
+    //   // const recordInput = {
+    //   //   fields: fields
+    //   // }; 
+
+    //   // updateRecord(recordInput).then((record) => {
+    //   //   console.log(record);
+    //   // });
+
+    // }
+
+
+
+    handleRadioChange(event) {
+        const selectedOption = event.target.value;
+
+        if (selectedOption == 'AM') {
+            this.dailyInterventions = this.allInterventionsList.filter(interv =>
+                parseFloat(interv.interventionTime.replace(':', '.')) < 12.00);
+            this.rowCount = this.dailyInterventions.length;
+        }
+
+        if (selectedOption == 'PM') {
+            console.log('PM click');
+            this.dailyInterventions = this.allInterventionsList.filter(interv =>
+                parseFloat(interv.interventionTime.replace(':', '.')) >= 12.00);
+            this.rowCount = this.dailyInterventions.length;
+        }
+
+        if (selectedOption == 'JOUR') {
+            console.log('JOUR click');
+            this.dailyInterventions = this.allInterventionsList;
+            this.rowCount = this.dailyInterventions.length;
+        }
+    }
+
+    handleDateChange(event) {
+
+        this.PostingDate = new Date(event.target.value);
+        this.dateDisplay = this.PostingDate.toISOString();
+        this.postingDateChange()
+        // getDailyInterventions({ chosenDate: this.PostingDate })
+        //     .then(result => {
+        //         this.allInterventionsList = result;
+        //         this.dailyInterventions = this.allInterventionsList;
+        //         this.rowCount = this.dailyInterventions.length;
+        //         console.log(this.dailyInterventions);
+        //     })
+        //     .catch(error => {
+        //         console.log(error);
+        //     });
 
         console.log('current value of the input detail: ' + JSON.stringify(event.detail));
 
-  }
+    }
 
-  
-  //this method sorts the columns in the main data table 
-  sortColumn(columnName){
+    addDays() {
+        this.PostingDate = this.PostingDate.addDays(1);
+        this.dateDisplay = this.PostingDate.toISOString();
+        this.postingDateChange();
+    }
 
-    let key = columnName.target.title.toLowerCase(); 
-    console.log('key: ' + key);
-    this.sortDirection = !this.sortDirection;
+    removeDays() {
+        this.PostingDate = this.PostingDate.minusDays(1);
+        this.dateDisplay = this.PostingDate.toISOString();
+        this.postingDateChange();
+    }
 
-   if(key == 'heure'){
-    console.log('cas heure :');
-    key = "interventionTime";
+    // this method retrieves information of all daily interventions which are visible in the main UI table
 
-    this.dailyInterventions.sort((a, b) => {
-      return this.sortDirection? parseFloat(a[key].replace(':', '.')) - parseFloat(b[key].replace(':', '.')) : 
-      parseFloat(b[key].replace(':', '.')) - parseFloat(a[key].replace(':', '.'));
-    }); 
-   }  else {
-      const dataType = typeof this.dailyInterventions[0][key];
-      this.dailyInterventions = JSON.parse(JSON.stringify(this.dailyInterventions));
+    // this method retrieves allows the user to navigate to the Account page by clicking the search icon
+    navigateToAccount() {
+        this[NavigationMixin.Navigate]({
+            type: "standard__recordPage",
+            attributes: {
+                recordId: this.intervention.Account__c,
+                objectApiName: "Account",
+                actionName: "view"
+            }
+        });
+    }
 
-      this.dailyInterventions.sort((a, b) => {
-        return this.sortDirection? a[key].localeCompare(b[key]) : b[key].localeCompare(a[key]) 
-      }); 
-  }
-  }
-  }
+    // this method retrieves allows the user to navigate to the Intervention page by clicking the search icon
+    navigateToIntervention() {
+        this[NavigationMixin.Navigate]({
+            type: "standard__recordPage",
+            attributes: {
+                recordId: this.intervention,
+                objectApiName: "Intervention__c",
+                actionName: "view"
+            }
+        });
+    }
+
+    // this method updates the client and intervention card on the right hand side,
+    // when the client code in the main table has been clicked.
+    // By default the first intervention in the main table is shown.
+    showIntervention(event) {
+        console.log("intervention Id:" + event.target.dataset.current);
+
+        getInterventions({ interventionId: event.target.dataset.current })
+            .then(result => {
+                let tmp = JSON.parse(JSON.stringify(result));
+                tmp.customerCode = tmp.Account__r.CustomerCode__c;
+                this.intervention = tmp;
+                console.log(this.intervention);
+
+                getAppareilForAccount({ accountId: this.intervention.Account__c })
+                    .then(result => {
+                        this.lstAppareil = result;
+                        this.nrAppareils = this.lstAppareil.length;
+                        console.log(this.lstAppareil);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            })
+
+            .catch(error => {
+                console.log(error);
+            });
+    }
+
+
+    //this method sorts the columns in the main data table 
+    sortColumn(columnName) {
+
+        let key = columnName.target.title.toLowerCase();
+        console.log('key: ' + key);
+        this.sortDirection = !this.sortDirection;
+
+        if (key == 'heure') {
+            console.log('cas heure :');
+            key = "interventionTime";
+
+            this.dailyInterventions.sort((a, b) => {
+                return this.sortDirection ? parseFloat(a[key].replace(':', '.')) - parseFloat(b[key].replace(':', '.')) :
+                    parseFloat(b[key].replace(':', '.')) - parseFloat(a[key].replace(':', '.'));
+            });
+        } else {
+            const dataType = typeof this.dailyInterventions[0][key];
+            this.dailyInterventions = JSON.parse(JSON.stringify(this.dailyInterventions));
+
+            this.dailyInterventions.sort((a, b) => {
+                return this.sortDirection ? a[key].localeCompare(b[key]) : b[key].localeCompare(a[key])
+            });
+        }
+    }
+}
