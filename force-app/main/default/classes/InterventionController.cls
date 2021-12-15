@@ -28,6 +28,10 @@ public class InterventionController {
 
     @AuraEnabled(cacheable=true)
     public static List<Appareil__c> getAppareilForAccount(Id accountId){
-        return [SELECT Id, APCode__c, Name, Type__c FROM Appareil__c WHERE Compte__c = :accountId WITH SECURITY_ENFORCED];
+        return [SELECT Id, APCode__c, Name, Type__c 
+        FROM Appareil__c 
+        WHERE Compte__c = :accountId 
+        WITH SECURITY_ENFORCED
+        ];
     }
 }

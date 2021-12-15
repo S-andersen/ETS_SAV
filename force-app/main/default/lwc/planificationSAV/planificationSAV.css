@@ -30,7 +30,6 @@
   border-color: rgb(38, 25, 88);
   font-weight: bold;
   font-size: 16px;
-  /* table-layout: fixed; */
   margin-left: auto;
   margin-right: auto;
   width: auto;
@@ -119,12 +118,13 @@ tr {
 }
 
 .radio{
-  /* display: inline-grid; */
-  /* grid-auto-flow: column; */
-  /* grid-template-columns: repeat(auto-fit, minmax(min-content, 3fr)); */
   grid-template-columns: minmax(50px, 200px)1fr 1fr;
 }
 input{
 border-style: none;
   
+}
+.techInput{
+  margin-right: 1em;
+  display: inline-flex;
 }

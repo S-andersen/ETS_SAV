@@ -24,21 +24,16 @@
 </br>
 <strong>+CHA:</strong> AA CB JZ 
 </br>
-<strong>absent(s):</strong>"></lightning-formatted-rich-text>
+<strong>absent(s): </strong>">{absents}</lightning-formatted-rich-text>
                 </lightning-layout-item>
 
                 <lightning-layout-item key={technAlias} padding="horizontal-medium" size="12" small-device-size="12"
                     medium-device-size="6" large-device-size="6">
-                    <template if:true={listAlias}>
-                        <template for:each={listAlias} for:item="alias" for:index="aliasIndex">
-                            <p key={alias}>
-                                <span class=&quot;tabulation&quot;><strong></strong></span>
-                                <lightning-formatted-text value={alias.name}></lightning-formatted-text>
-                                <span class=&quot;tabulation&quot;><strong></strong></span>
-                                <lightning-formatted-text value={alias.nr}></lightning-formatted-text>
+                        <template for:each={listAlias} for:item="technicien" for:index="aliasIndex">
+                            <p class="techInput" key={technicien.id}>
+                                <span><strong>{technicien.alias} :</strong> {technicien.nr}</span>
                             </p>
                         </template>
-                    </template>
                 </lightning-layout-item>
 
                 <div class="div-1">
@@ -166,7 +161,7 @@
                                                             <input type="text" value={interv.technicien} id={techInput}
                                                                 class="techInput slds-m-around_none" maxlength="2"
                                                                 data-index={index} data-current={interv.id}
-                                                                data-cell="cellTechnicien" onchange={updateAlias}
+                                                                data-cell="cellTechnicien" onkeypress={updateAlias}
                                                                 name="techInput">
                                                             </input>
                                                         </td>

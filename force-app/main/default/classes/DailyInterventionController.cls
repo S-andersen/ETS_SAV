@@ -58,4 +58,19 @@ public with sharing class DailyInterventionController {
         @AuraEnabled
         public String description{get;set;}
     }
+
+
+    @AuraEnabled
+    public static void saveConfirmedTechnicians(List<Wrapper> interventionsToUpdate){
+        try{ 
+            System.debug('save method*****');
+            System.debug('controller ***' + interventionsToUpdate);
+            for(wrapper wr : interventionsToUpdate){
+                System.debug(wr.technicien); 
+            }
+        } catch(AuraException e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+
+    }
 }

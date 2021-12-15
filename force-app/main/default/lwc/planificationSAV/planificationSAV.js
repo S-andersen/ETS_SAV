@@ -3,7 +3,11 @@ import getInterventions from "@salesforce/apex/InterventionController.getInterve
 import getDailyInterventions from "@salesforce/apex/DailyInterventionController.getDailyInterventions";
 import getAppareilForAccount from "@salesforce/apex/InterventionController.getAppareilForAccount";
 import { NavigationMixin } from "lightning/navigation";
-import { updateRecord } from "lightning/uiRecordApi";
+import getTechnicians from "@salesforce/apex/TechnicianController.getTechnicians"
+import saveConfirmedTechnicians from "@salesforce/apex/DailyInterventionController.saveConfirmedTechnicians";
+import { updateRecord } from 'lightning/uiRecordApi';
+import ID_FIELD from '@salesforce/schema/Intervention__c.id'; 
+import TEMPORARYTECHNICIAN_FIELD from '@salesforce/schema/Intervention__c.TemporaryTechnician__c'; 
 
 const COLUMNS = [
     { label: "Code", fieldName: "APCode__c", type: "text" },
@@ -24,15 +28,16 @@ Date.prototype.minusDays = function (days) {
 };
 
 export default class planificationSAV extends NavigationMixin(LightningElement) {
+
+    @api recordId;
+
     @track PostingDate;
-    @track dateDisplay
-
-    async connectedCallback() {
-        this.PostingDate = new Date();
-        this.dateDisplay = this.PostingDate.toISOString();
-        this.postingDateChange();
-    }
-
+    @track dateDisplay;
+    @track listAlias = [];
+    @track dailyInterventions;
+    @track rowCount;
+    @track newValue;
+    @track listTechAlias;
 
     sortDirection = false;
     allInterventionsList;
@@ -42,33 +47,114 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
     lstAppareil;
     columns = COLUMNS;
     index;
-
-
-
+    aliasIndex;
     value = 'JOUR';
-    listAlias = [{ name: "TT: ", nr: "0" }];
-
-
-
-    @track dailyInterventions;
-    @track rowCount;
-    @track newValue;
-
-    @api recordId;
     name;
     techInput;
+    absents = "DD"; 
 
+    async connectedCallback() {
+        this.PostingDate = new Date();
+        this.dateDisplay = this.PostingDate.toISOString();
+        this.postingDateChange();
+        this.postingTechniciansAlias();
+    }
+
+    countAlias(){
+        var count = {};
+        console.log('list daily: ' + JSON.stringify(this.dailyInterventions)); 
+        
+                    for (var element of this.dailyInterventions) {
+                        console.log('element: ' + element); 
+                        if (count[element.technicien]) {
+                            count[element.technicien] +=1; 
+                        } else {
+                            count[element.technicien] = 1; 
+                        }
+                    }
+                    console.log('count ' + JSON.stringify(count)); 
+                    let test = [... this.listAlias];
+                    let i = 0; 
+        
+                    for(i = 0; i< test.length; i++) {
+                        if(count[test[i].alias]!=null){
+                            let newRow = { ...test[i], ['nr']: count[test[i].alias] }; 
+                            test[i] = newRow; 
+                        } else {
+                            let newRow = { ...test[i], ['nr']: 0}; 
+                            test[i] = newRow; 
+                        }
+                    }
+                    this.listAlias = test; 
+ }
+    
+    postingTechniciansAlias(){
+        console.log('enters postingTechniciansAlias'); 
+        getTechnicians()
+        .then(res => {
+            console.log('res?: ' + res); 
+            if(res) {
+                this.listAlias = res;
+            }
+            this.countAlias(); 
+
+        })
+        .catch(error => {
+            console.log(error);
+        });   
+    }
+    
+        //this method allows the user to update the technicien field
+        updateAlias(event) {
+
+        if(event.keyCode == 13){
+            let rowIndex = event.target.dataset.index;
+            let newArray = [...this.dailyInterventions];
+                console.log('ENTER 13');
+            
+            console.log('listAlias' + JSON.stringify(this.listAlias));
+    
+            if (event.target.name === "techInput") {
+                let updatedRow = { ...newArray[rowIndex], ['technicien']: event.target.value };
+                newArray[rowIndex] = updatedRow;
+            }
+    
+            this.dailyInterventions = newArray;
+            this.countAlias(); 
+
+            let techAlias = this.listAlias.find(techId => techId.alias == this.dailyInterventions[rowIndex].technicien);
+            if(techAlias != undefined){
+                const fields = {};
+                fields[ID_FIELD.fieldApiName] = this.dailyInterventions[rowIndex].id; 
+                fields[TEMPORARYTECHNICIAN_FIELD.fieldApiName] = techAlias.id; 
+
+                event.target.style.background = '#ffffff';
+                
+                const recordInput = { fields }
+    
+                updateRecord(recordInput)
+                .then(() => {console.log('ok update')})
+                .catch(error => {console.log(error)})
+                event.target.style.background = '#7fb467'; 
+            } else{
+                event.target.style.background = '#EC4134';  
+            }
+            
+          }
+        }
+    
     postingDateChange() {
         console.log('test');
-        getDailyInterventions({ chosenDate: this.PostingDate })
+        getDailyInterventions({ chosenDate: this.PostingDate }) 
             .then(res => {
                 console.log('test 2 ' + res);
                 if (res) {
                     this.allInterventionsList = res;
                     this.dailyInterventions = this.allInterventionsList;
                     this.rowCount = this.dailyInterventions.length;
+                    this.postingTechniciansAlias(); 
+                    this.countAlias(); 
 
-                    console.log('this is the list:' + this.dailyInterventions);
                     getInterventions({ interventionId: this.dailyInterventions[0].id })
                         .then(result => {
                             let tmp = JSON.parse(JSON.stringify(result));
@@ -96,47 +182,22 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
             })
     }
 
-    //this method allows the user to update the technicien field
-    updateAlias(event) {
+// this method updates the technicians from temporary to confirmed on intervention object
+// by clicking the button 
 
-        let rowIndex = event.target.dataset.index;
-        let newArray = [...this.dailyInterventions];
-
-
-        console.log('listAlias' + this.listAlias);
-
-        if (event.target.name === "techInput") {
-            let updatedRow = { ...newArray[rowIndex], ['technicien']: event.target.value };
-            newArray[rowIndex] = updatedRow;
-        }
-
-        this.dailyInterventions = newArray;
+    handleClick(event){
+        console.log('SAVE button clicked'); 
+        saveConfirmedTechnicians({interventionsToUpdate : this.dailyInterventions})
+        .then(()=> console.log('*** OK '))
+        .catch(error => console.log('ERRORRRRRR*****' + error)); 
 
     }
-
-    // handleClick(event){
-
-    //   // example taken from here: https://blog.salesforcecasts.com/how-to-use-updaterecord-in-lwc/ 
-
-    //   // const fields = {}; 
-
-    //   // fields[ID_FIELD.fieldApiName] = this.recordId; 
-    //   // fields[NAME_FIELD.fieldApiName] = this.name;
-
-    //   // const recordInput = {
-    //   //   fields: fields
-    //   // }; 
-
-    //   // updateRecord(recordInput).then((record) => {
-    //   //   console.log(record);
-    //   // });
-
-    // }
 
 
 
     handleRadioChange(event) {
         const selectedOption = event.target.value;
+
 
         if (selectedOption == 'AM') {
             this.dailyInterventions = this.allInterventionsList.filter(interv =>
@@ -163,19 +224,6 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
         this.PostingDate = new Date(event.target.value);
         this.dateDisplay = this.PostingDate.toISOString();
         this.postingDateChange()
-        // getDailyInterventions({ chosenDate: this.PostingDate })
-        //     .then(result => {
-        //         this.allInterventionsList = result;
-        //         this.dailyInterventions = this.allInterventionsList;
-        //         this.rowCount = this.dailyInterventions.length;
-        //         console.log(this.dailyInterventions);
-        //     })
-        //     .catch(error => {
-        //         console.log(error);
-        //     });
-
-        console.log('current value of the input detail: ' + JSON.stringify(event.detail));
-
     }
 
     addDays() {
@@ -189,8 +237,6 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
         this.dateDisplay = this.PostingDate.toISOString();
         this.postingDateChange();
     }
-
-    // this method retrieves information of all daily interventions which are visible in the main UI table
 
     // this method retrieves allows the user to navigate to the Account page by clicking the search icon
     navigateToAccount() {
@@ -239,7 +285,6 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
                         console.log(error);
                     });
             })
-
             .catch(error => {
                 console.log(error);
             });
