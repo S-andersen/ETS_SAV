@@ -65,9 +65,26 @@ public with sharing class DailyInterventionController {
         try{ 
             System.debug('save method*****');
             System.debug('controller ***' + interventionsToUpdate);
+
+            set<Id> intervId = new set<Id>(); 
+
             for(wrapper wr : interventionsToUpdate){
+                intervId.add(wr.id);
+
                 System.debug(wr.technicien); 
             }
+            map<Id, intervention__c> mapId = new map<Id, intervention__c> (
+                [SELECT Id, TemporaryTechnician__c, ValidateTechnician__c 
+                   FROM Intervention__c 
+                   WHERE Id 
+                   IN : intervId]);     
+                   System.debug('mapId:*** ' + mapId); 
+            
+            for(intervention__c interv : mapId.values()){
+                interv.ValidateTechnician__c = interv.TemporaryTechnician__c; 
+            }
+            update mapId.values(); 
+
         } catch(AuraException e) {
             throw new AuraHandledException(e.getMessage());
         }

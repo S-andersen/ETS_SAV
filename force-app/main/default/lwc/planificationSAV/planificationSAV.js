@@ -8,13 +8,13 @@ import saveConfirmedTechnicians from "@salesforce/apex/DailyInterventionControll
 import { updateRecord } from 'lightning/uiRecordApi';
 import ID_FIELD from '@salesforce/schema/Intervention__c.id'; 
 import TEMPORARYTECHNICIAN_FIELD from '@salesforce/schema/Intervention__c.TemporaryTechnician__c'; 
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 const COLUMNS = [
     { label: "Code", fieldName: "APCode__c", type: "text" },
     { label: "Nom", fieldName: "Name", type: "text" },
     { label: "Details", fieldName: "Type__c", type: "text" }
 ];
-
 
 Date.prototype.addDays = function (days) {
     var date = new Date(this.valueOf());
@@ -30,6 +30,7 @@ Date.prototype.minusDays = function (days) {
 export default class planificationSAV extends NavigationMixin(LightningElement) {
 
     @api recordId;
+    
 
     @track PostingDate;
     @track dateDisplay;
@@ -51,13 +52,17 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
     value = 'JOUR';
     name;
     techInput;
-    absents = "DD"; 
+
+    // absents = 'DD';
+   
+    
 
     async connectedCallback() {
         this.PostingDate = new Date();
         this.dateDisplay = this.PostingDate.toISOString();
         this.postingDateChange();
         this.postingTechniciansAlias();
+        console.log('absents: ' + absents);
     }
 
     countAlias(){
@@ -90,6 +95,7 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
     
     postingTechniciansAlias(){
         console.log('enters postingTechniciansAlias'); 
+        
         getTechnicians()
         .then(res => {
             console.log('res?: ' + res); 
@@ -133,8 +139,8 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
                 const recordInput = { fields }
     
                 updateRecord(recordInput)
-                .then(() => {console.log('ok update')})
-                .catch(error => {console.log(error)})
+                .then(() => {})
+                .catch(error => {})
                 event.target.style.background = '#7fb467'; 
             } else{
                 event.target.style.background = '#EC4134';  
@@ -188,8 +194,18 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
     handleClick(event){
         console.log('SAVE button clicked'); 
         saveConfirmedTechnicians({interventionsToUpdate : this.dailyInterventions})
-        .then(()=> console.log('*** OK '))
-        .catch(error => console.log('ERRORRRRRR*****' + error)); 
+        .then(()=> {this.dispatchEvent(
+            new ShowToastEvent({
+       title: 'Modifications validées',
+       variant: 'success'
+   })
+);})
+        .catch(error => {this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Une erreur est survenue',
+                variant: 'error'
+            })
+        );}); 
 
     }
 
