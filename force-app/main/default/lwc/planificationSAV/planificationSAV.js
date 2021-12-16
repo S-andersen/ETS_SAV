@@ -6,8 +6,8 @@ import { NavigationMixin } from "lightning/navigation";
 import getTechnicians from "@salesforce/apex/TechnicianController.getTechnicians"
 import saveConfirmedTechnicians from "@salesforce/apex/DailyInterventionController.saveConfirmedTechnicians";
 import { updateRecord } from 'lightning/uiRecordApi';
-import ID_FIELD from '@salesforce/schema/Intervention__c.id'; 
-import TEMPORARYTECHNICIAN_FIELD from '@salesforce/schema/Intervention__c.TemporaryTechnician__c'; 
+import ID_FIELD from '@salesforce/schema/Intervention__c.Id';
+import TEMPORARYTECHNICIAN_FIELD from '@salesforce/schema/Intervention__c.TemporaryTechnician__c';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 const COLUMNS = [
@@ -30,12 +30,12 @@ Date.prototype.minusDays = function (days) {
 export default class planificationSAV extends NavigationMixin(LightningElement) {
 
     @api recordId;
-    
+
 
     @track PostingDate;
     @track dateDisplay;
     @track listAlias = [];
-    @track dailyInterventions;
+    dailyInterventions;
     @track rowCount;
     @track newValue;
     @track listTechAlias;
@@ -52,10 +52,8 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
     value = 'JOUR';
     name;
     techInput;
+    absent = "DD";
 
-    // absents = 'DD';
-   
-    
 
     async connectedCallback() {
         this.PostingDate = new Date();
@@ -63,103 +61,117 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
         this.postingDateChange();
         this.postingTechniciansAlias();
         console.log('absents: ' + absents);
+
     }
 
-    countAlias(){
+    countAlias() {
         var count = {};
-        console.log('list daily: ' + JSON.stringify(this.dailyInterventions)); 
-        
-                    for (var element of this.dailyInterventions) {
-                        console.log('element: ' + element); 
-                        if (count[element.technicien]) {
-                            count[element.technicien] +=1; 
-                        } else {
-                            count[element.technicien] = 1; 
-                        }
-                    }
-                    console.log('count ' + JSON.stringify(count)); 
-                    let test = [... this.listAlias];
-                    let i = 0; 
-        
-                    for(i = 0; i< test.length; i++) {
-                        if(count[test[i].alias]!=null){
-                            let newRow = { ...test[i], ['nr']: count[test[i].alias] }; 
-                            test[i] = newRow; 
-                        } else {
-                            let newRow = { ...test[i], ['nr']: 0}; 
-                            test[i] = newRow; 
-                        }
-                    }
-                    this.listAlias = test; 
- }
-    
-    postingTechniciansAlias(){
-        console.log('enters postingTechniciansAlias'); 
-        
-        getTechnicians()
-        .then(res => {
-            console.log('res?: ' + res); 
-            if(res) {
-                this.listAlias = res;
+        console.log('list daily: ' + JSON.stringify(this.dailyInterventions));
+
+        for (var element of this.dailyInterventions) {
+            console.log('element: ' + element);
+            if (count[element.technicien]) {
+                count[element.technicien] += 1;
+            } else {
+                count[element.technicien] = 1;
             }
-            this.countAlias(); 
-
-        })
-        .catch(error => {
-            console.log(error);
-        });   
-    }
-    
-        //this method allows the user to update the technicien field
-        updateAlias(event) {
-
-        if(event.keyCode == 13){
-            let rowIndex = event.target.dataset.index;
-            let newArray = [...this.dailyInterventions];
-                console.log('ENTER 13');
-            
-            console.log('listAlias' + JSON.stringify(this.listAlias));
-    
-            if (event.target.name === "techInput") {
-                let updatedRow = { ...newArray[rowIndex], ['technicien']: event.target.value };
-                newArray[rowIndex] = updatedRow;
-            }
-    
-            this.dailyInterventions = newArray;
-            this.countAlias(); 
-
-            let techAlias = this.listAlias.find(techId => techId.alias == this.dailyInterventions[rowIndex].technicien);
-            if(techAlias != undefined){
-                const fields = {};
-                fields[ID_FIELD.fieldApiName] = this.dailyInterventions[rowIndex].id; 
-                fields[TEMPORARYTECHNICIAN_FIELD.fieldApiName] = techAlias.id; 
-
-                event.target.style.background = '#ffffff';
-                
-                const recordInput = { fields }
-    
-                updateRecord(recordInput)
-                .then(() => {})
-                .catch(error => {})
-                event.target.style.background = '#7fb467'; 
-            } else{
-                event.target.style.background = '#EC4134';  
-            }
-            
-          }
         }
-    
+        console.log('count ' + JSON.stringify(count));
+        let test = [... this.listAlias];
+        let i = 0;
+
+        for (i = 0; i < test.length; i++) {
+            if (count[test[i].alias] != null) {
+                let newRow = { ...test[i], ['nr']: count[test[i].alias] };
+                test[i] = newRow;
+            } else {
+                let newRow = { ...test[i], ['nr']: 0 };
+                test[i] = newRow;
+            }
+        }
+        this.listAlias = test;
+    }
+
+    postingTechniciansAlias() {
+        console.log('enters postingTechniciansAlias');
+
+        getTechnicians()
+            .then(res => {
+                console.log('res?: ' + res);
+                if (res) {
+                    this.listAlias = res;
+                }
+                this.countAlias();
+
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }
+
+    //this method allows the user to update the technicien field
+    updateAlias(event) {
+        let tmpAlias = event.target.value;
+        let rowIndex = event.target.dataset.index;
+        let oldAlias = this.dailyInterventions[rowIndex].technicien;
+        event.target.style.background = '#ffffff';
+        if (tmpAlias.length > 0) {
+            if (event.target.name == "techInput") {
+                this.dailyInterventions[rowIndex].technicien = tmpAlias;
+            }
+
+            this.countAlias();
+
+            let techAlias = this.listAlias.find(techId => techId.alias == tmpAlias);
+            if (techAlias != undefined) {
+                event.target.style.background = '#7fb467';
+                if (oldAlias != tmpAlias) {
+                    const fields = {};
+                    fields[ID_FIELD.fieldApiName] = this.dailyInterventions[rowIndex].id;
+                    fields[TEMPORARYTECHNICIAN_FIELD.fieldApiName] = techAlias.id;
+                    const recordInput = { fields }
+                    console.log('test update alias');
+                    updateRecord(recordInput)
+                        .then(() => {
+                        })
+                        .catch(error => { })
+                }
+
+            } else {
+                event.target.style.background = '#EC4134';
+            }
+
+        }
+        else if (tmpAlias == '') {
+            this.dailyInterventions[rowIndex].technicien = tmpAlias;
+            const fields = {};
+            fields[ID_FIELD.fieldApiName] = this.dailyInterventions[rowIndex].id;
+            fields[TEMPORARYTECHNICIAN_FIELD.fieldApiName] = null;
+            const recordInput = { fields }
+
+            updateRecord(recordInput)
+                .then(() => {
+
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+
+        }
+    }
+
     postingDateChange() {
         console.log('test');
-        getDailyInterventions({ chosenDate: this.PostingDate }) 
+        getDailyInterventions({ chosenDate: this.PostingDate })
             .then(res => {
                 console.log('test 2 ' + res);
                 if (res) {
                     this.allInterventionsList = res;
-                    this.dailyInterventions = this.allInterventionsList;
+                    this.dailyInterventions = JSON.parse(JSON.stringify(this.allInterventionsList));
+                    console.log(this.dailyInterventions);
                     this.rowCount = this.dailyInterventions.length;
-                    this.postingTechniciansAlias(); 
-                    this.countAlias(); 
+                    this.postingTechniciansAlias();
+                    this.countAlias();
 
                     getInterventions({ interventionId: this.dailyInterventions[0].id })
                         .then(result => {
@@ -188,24 +200,28 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
             })
     }
 
-// this method updates the technicians from temporary to confirmed on intervention object
-// by clicking the button 
+    // this method updates the technicians from temporary to confirmed on intervention object
+    // by clicking the button 
 
-    handleClick(event){
-        console.log('SAVE button clicked'); 
-        saveConfirmedTechnicians({interventionsToUpdate : this.dailyInterventions})
-        .then(()=> {this.dispatchEvent(
-            new ShowToastEvent({
-       title: 'Modifications validées',
-       variant: 'success'
-   })
-);})
-        .catch(error => {this.dispatchEvent(
-            new ShowToastEvent({
-                title: 'Une erreur est survenue',
-                variant: 'error'
+    handleClick(event) {
+        console.log('SAVE button clicked');
+        saveConfirmedTechnicians({ interventionsToUpdate: this.dailyInterventions })
+            .then(() => {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Modifications validées',
+                        variant: 'success'
+                    })
+                );
             })
-        );}); 
+            .catch(error => {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Une erreur est survenue',
+                        variant: 'error'
+                    })
+                );
+            });
 
     }
 
@@ -271,7 +287,7 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
         this[NavigationMixin.Navigate]({
             type: "standard__recordPage",
             attributes: {
-                recordId: this.intervention,
+                recordId: this.intervention.id,
                 objectApiName: "Intervention__c",
                 actionName: "view"
             }

@@ -1,12 +1,20 @@
+/**
+ * @description       : 
+ * @author            : SANDERSEN
+ * @last modified on  : 16/12/2021
+ * @last modified by  : JBBARTHELEMY
+**/
 public with sharing class DailyInterventionController {
    
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled(cacheable=false)
     public static List<Wrapper> getDailyInterventions(String chosenDate) {
         System.debug('chosenDate: ' + chosenDate);
         System.debug('date format: ' + date.valueOf(chosenDate));
 
 
-        List<Intervention__c> interventions = [SELECT Id, Account__r.CustomerCode__c, Name, Account__r.BillingPostalCode, Account__r.AccountingBalance__c, StartDate__c, Type__c, Qualification__c, TemporaryTechnician__r.Alias, InterventionDescription__c
+        List<Intervention__c> interventions = [SELECT Id, Account__r.CustomerCode__c, Name, Account__r.BillingPostalCode, Account__r.AccountingBalance__c,
+            StartDate__c, Type__c, Qualification__c, TemporaryTechnician__c, TemporaryTechnician__r.Alias, InterventionDescription__c,
+            (SELECT Id, Field, OldValue, NewValue FROM Histories WHERE Field = 'StartDate__c')
             FROM Intervention__c
             WHERE StartDate__c >= :date.valueOf(chosenDate) AND StartDate__c < :date.valueOf(chosenDate).addDays(1)
             ORDER BY StartDate__c
@@ -26,8 +34,9 @@ public with sharing class DailyInterventionController {
             wrapper.interventionTime = intervention.StartDate__c.format('HH:mm');
             wrapper.type = intervention.Type__c;
             wrapper.qualification = intervention.Qualification__c;
-            wrapper.technicien = intervention.TemporaryTechnician__r.Alias;
+            wrapper.technicien = intervention.TemporaryTechnician__c != null ? intervention.TemporaryTechnician__r.Alias : '';
             wrapper.description = intervention.InterventionDescription__c;
+            wrapper.isDateChange = intervention.Histories.size() > 0 ? true : false;
             response.add(wrapper);
         }
         System.debug('see the response?' + response);
@@ -57,6 +66,8 @@ public with sharing class DailyInterventionController {
         public String technicien{get;set;}
         @AuraEnabled
         public String description{get;set;}
+        @AuraEnabled
+        public Boolean isDateChange{get;set;}
     }
 
 

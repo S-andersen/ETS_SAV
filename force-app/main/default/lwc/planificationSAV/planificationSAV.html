@@ -2,7 +2,7 @@
   @description       : 
   @author            : JBBARTHELEMY // SANDERSEN
   @group             : 
-  @last modified on  : 08/12/2021
+  @last modified on  : 16/12/2021
   @last modified by  : JBBARTHELEMY
 -->
 <template>
@@ -18,22 +18,23 @@
             <lightning-layout pull-to-boundary="medium" multiple-rows="true">
                 <lightning-layout-item padding="horizontal-medium" size="12" small-device-size="12"
                     medium-device-size="6" large-device-size="6">
-                    <lightning-formatted-rich-text value="<strong>+TEC:</strong> AL CC DM
-</br>
-<strong>-TEC:</strong> AX FC SC YB
-</br>
-<strong>+CHA:</strong> AA CB JZ 
-</br>
-<strong>absent(s): </strong>">{absents}</lightning-formatted-rich-text>
+                    <span> <strong>+TEC:</strong> AL CC DM
+                        </br>
+                        <strong>-TEC:</strong> AX FC SC YB
+                        </br>
+                        <strong>+CHA:</strong> AA CB JZ
+                        </br>
+                        <strong>absent(s): {absent} </strong>
+                    </span>
                 </lightning-layout-item>
 
                 <lightning-layout-item key={technAlias} padding="horizontal-medium" size="12" small-device-size="12"
                     medium-device-size="6" large-device-size="6">
-                        <template for:each={listAlias} for:item="technicien" for:index="aliasIndex">
-                            <p class="techInput" key={technicien.id}>
-                                <span><strong>{technicien.alias} :</strong> {technicien.nr}</span>
-                            </p>
-                        </template>
+                    <template for:each={listAlias} for:item="technicien" for:index="aliasIndex">
+                        <p class="techInput" key={technicien.id}>
+                            <span><strong>{technicien.alias} :</strong> {technicien.nr}</span>
+                        </p>
+                    </template>
                 </lightning-layout-item>
 
                 <div class="div-1">
@@ -122,10 +123,20 @@
                                                         style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;"
                                                         key={interv.id} data-index={index} data-current={interv.id}
                                                         onclick={showIntervention} ondblclick={navigateToAccount}>
-                                                        <td scope="row" data-index={index} data-current={interv.id}
-                                                            onclick={showIntervention} ondblclick={navigateToAccount}
-                                                            class="slds-truncate client">
-                                                            {interv.client}</td>
+                                                        <template if:true={interv.isDateChange}>
+                                                            <td scope="row" data-index={index} data-current={interv.id}
+                                                                onclick={showIntervention}
+                                                                ondblclick={navigateToAccount}
+                                                                class="slds-truncate client reej-intervention-date-change">
+                                                                {interv.client}</td>
+                                                        </template>
+                                                        <template if:false={interv.isDateChange}>
+                                                            <td scope="row" data-index={index} data-current={interv.id}
+                                                                onclick={showIntervention}
+                                                                ondblclick={navigateToAccount}
+                                                                class="slds-truncate client">
+                                                                {interv.client}</td>
+                                                        </template>
                                                         <td scope="row" data-index={index} data-current={interv.id}
                                                             onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
@@ -161,7 +172,7 @@
                                                             <input type="text" value={interv.technicien} id={techInput}
                                                                 class="techInput slds-m-around_none" maxlength="2"
                                                                 data-index={index} data-current={interv.id}
-                                                                data-cell="cellTechnicien" onkeypress={updateAlias}
+                                                                data-cell="cellTechnicien" onkeyup={updateAlias}
                                                                 name="techInput">
                                                             </input>
                                                         </td>

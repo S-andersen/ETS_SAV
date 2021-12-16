@@ -128,3 +128,7 @@ border-style: none;
   margin-right: 1em;
   display: inline-flex;
 }
+
+.reej-intervention-date-change{
+  background-color : #EC4134;
+}
