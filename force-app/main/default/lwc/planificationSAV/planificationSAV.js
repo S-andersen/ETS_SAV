@@ -9,12 +9,18 @@ import { updateRecord } from 'lightning/uiRecordApi';
 import ID_FIELD from '@salesforce/schema/Intervention__c.Id';
 import TEMPORARYTECHNICIAN_FIELD from '@salesforce/schema/Intervention__c.TemporaryTechnician__c';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+// import { getPicklistValues } from 'lightning/uiObjectInfoApi';
+// import TYPE_FIELD from '@salesforce/schema/Intervention__c.Type__c';
 
 const COLUMNS = [
-    { label: "Code", fieldName: "APCode__c", type: "text" },
-    { label: "Nom", fieldName: "Name", type: "text" },
-    { label: "Details", fieldName: "Type__c", type: "text" }
+    { label: "Type", fieldName: "Type__c", type: "text"},
+    { label: "Energie", fieldName: "Energy__c", type: "text",
+      cellAttributes: {
+          class:{fieldName:'energyColor'}
+      }},
+    { label: "Autre Energie", fieldName: "OtherEnergy__c", type: "text" }
 ];
+
 
 Date.prototype.addDays = function (days) {
     var date = new Date(this.valueOf());
@@ -35,12 +41,13 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
     @track PostingDate;
     @track dateDisplay;
     @track listAlias = [];
-    dailyInterventions;
+    
     @track rowCount;
     @track newValue;
     @track listTechAlias;
 
     sortDirection = false;
+    dailyInterventions;
     allInterventionsList;
     today;
     nrAppareils;
@@ -53,6 +60,8 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
     name;
     techInput;
     absent = "DD";
+    timeDiff; 
+
 
 
     async connectedCallback() {
@@ -61,8 +70,13 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
         this.postingDateChange();
         this.postingTechniciansAlias();
         console.log('absents: ' + absents);
-
     }
+
+    // //this method retrieves the picklist values of the intervention type
+    // @wire (getPicklistValues, {
+    //     recordTypeId: '012000000000000AAA', // Default record type Id
+    //     fieldApiName: TYPE_FIELD
+    // })
 
     countAlias() {
         var count = {};
@@ -114,7 +128,7 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
         let tmpAlias = event.target.value;
         let rowIndex = event.target.dataset.index;
         let oldAlias = this.dailyInterventions[rowIndex].technicien;
-        event.target.style.background = '#ffffff';
+        event.target.style.background = '#FF000000';
         if (tmpAlias.length > 0) {
             if (event.target.name == "techInput") {
                 this.dailyInterventions[rowIndex].technicien = tmpAlias;
@@ -181,8 +195,8 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
                             console.log(this.intervention);
 
                             getAppareilForAccount({ accountId: this.intervention.Account__c })
-                                .then(result => {
-                                    this.lstAppareil = result;
+                                .then(result => { 
+                                    this.lstAppareil = this.getEnergyColor(result); 
                                     this.nrAppareils = this.lstAppareil.length;
                                     console.log(this.lstAppareil);
                                 })
@@ -309,7 +323,7 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
 
                 getAppareilForAccount({ accountId: this.intervention.Account__c })
                     .then(result => {
-                        this.lstAppareil = result;
+                        this.lstAppareil = this.getEnergyColor(result);
                         this.nrAppareils = this.lstAppareil.length;
                         console.log(this.lstAppareil);
                     })
@@ -322,6 +336,24 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
             });
     }
 
+    getEnergyColor(result){
+        return result.map(item => {
+            let energyColor; 
+            switch(item.Energy__c){
+                case 'Gaz': energyColor = "slds-icon-standard-case slds-text-color_default"; break;
+                case 'Electricité / Pompe à chaleur': energyColor = "slds-icon-custom-custom32 slds-text-color_default"; break;
+                case 'Bois / Granule': energyColor = " slds-icon-standard-fulfillment-order slds-text-color_default"; break;
+                case 'Fioul': energyColor = "slds-icon-standard-loop slds-text-color_default"; break;
+                case 'Eau / Adoucisseur traitement eau': energyColor = "slds-icon-standard-flow slds-text-color_default"; break;
+                case 'Ramonage': energyColor = "slds-icon-standard-group-loading slds-text-color_default"; break;
+                
+            }
+            return {...item, 
+                'energyColor':energyColor
+            }
+        });
+    }
+
 
     //this method sorts the columns in the main data table 
     sortColumn(columnName) {
@@ -331,7 +363,6 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
         this.sortDirection = !this.sortDirection;
 
         if (key == 'heure') {
-            console.log('cas heure :');
             key = "interventionTime";
 
             this.dailyInterventions.sort((a, b) => {
@@ -347,4 +378,4 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
             });
         }
     }
-}
+} 

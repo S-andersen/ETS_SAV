@@ -18,11 +18,13 @@
             <lightning-layout pull-to-boundary="medium" multiple-rows="true">
                 <lightning-layout-item padding="horizontal-medium" size="12" small-device-size="12"
                     medium-device-size="6" large-device-size="6">
-                    <span> <strong>+TEC:</strong> AL CC DM
+                    <span> <strong>TEC:</strong> AL CC DM
                         </br>
-                        <strong>-TEC:</strong> AX FC SC YB
+                        <strong>CHA:</strong> AX FC SC YB
                         </br>
-                        <strong>+CHA:</strong> AA CB JZ
+                        <strong>ELE:</strong> AA CB JZ
+                        </br>
+                        <strong>BUR:</strong> LLJ KL AC
                         </br>
                         <strong>absent(s): {absent} </strong>
                     </span>
@@ -79,40 +81,38 @@
                                                     icon-name="utility:forward" onclick={addDays}></lightning-button>
                                             </div>
                                         </lightning-button-group>
+                                        <div class="slds-text-align_right">
+                                            <lightning-button-icon label="Refresh" icon-position="right" class="button-1"
+                                                icon-name="utility:refresh" onclick={resfresh}></lightning-button-icon>
+                                        </div>
                                     </lightning-layout>
                                 </lightning-layout-item>
                             </lightning-layout>
                             <lightning-layout>
                                 <lightning-layout-item>
-                                    <table id="Table-id" class="slds-table 
-                                        slds-max-medium-table_stacked-horizontal slds-table_fixed-layout">
+                                    <table id="Table-id" class="slds-table slds-table_fixed-layout slds-table_striped
+                                        slds-max-medium-table_stacked-horizontal">
                                         <tr class="slds-icon-utility-arrowdown slds-is-sortable slds-is-sorted_asc">
-                                            <th scope="col" onclick={sortColumn}
-                                                class="slds-truncate slds-icon-utility-arrowdown slds-is-sortable slds-is-sorted_asc"
-                                                title="Client">Client</th>
-                                            <th scope="col" onclick={sortColumn}
-                                                class="slds-truncate slds-icon-utility-arrowdown slds-is-sortable slds-is-sorted_asc"
-                                                title="Nom">
-                                                Nom
-                                            </th>
-                                            <th scope="col" onclick={sortColumn}
-                                                class="slds-truncate slds-icon-utility-arrowdown slds-is-sortable slds-is-sorted_asc"
-                                                title="CP">CP
-                                            </th>
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate" title="Client">
+                                                Client</th>
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate" title="Nom">
+                                                Nom</th>
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate" title="Street">
+                                                Adresse</th>
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate" title="CP">
+                                                CP</th>
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate" title="City">
+                                                Ville</th>
                                             <th scope="col" onclick={sortColumn} class="slds-truncate" title="Solde">
                                                 Solde</th>
-                                            <th scope="col" class="slds-truncate" title="Date">
-                                                Date</th>
                                             <th scope="col" onclick={sortColumn} class="slds-truncate" title="Heure">
                                                 Heure</th>
                                             <th scope="col" onclick={sortColumn} class="slds-truncate" title="Type">
                                                 Type</th>
-                                            <th scope="col" onclick={sortColumn} class="slds-truncate"
-                                                title="Qualification">Qualification</th>
-                                            <th scope="col" onclick={sortColumn} class="slds-truncate"
-                                                title="Technicien">Technicien</th>
-                                            <th scope="col" onclick={sortColumn} class="slds-cell-wrap slds-truncate"
-                                                title="Description">Description</th>
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate" title="Qualification">
+                                                Qualification</th>
+                                            <th scope="col" onclick={sortColumn} class="slds-truncate" title="Technicien">
+                                                Technicien</th>
                                         </tr>
 
                                         <tbody id="tableData">
@@ -134,26 +134,65 @@
                                                             <td scope="row" data-index={index} data-current={interv.id}
                                                                 onclick={showIntervention}
                                                                 ondblclick={navigateToAccount}
-                                                                class="slds-truncate client">
+                                                                class="slds-truncate">
                                                                 {interv.client}</td>
                                                         </template>
+                                                        <template if:true={interv.isDateChange}>
+                                                            <td scope="row" data-index={index} data-current={interv.id}
+                                                                onclick={showIntervention} ondblclick={navigateToAccount}
+                                                                class="slds-truncate reej-intervention-name">
+                                                                {interv.nom}</td>
+                                                            </template>
+                                                        <template if:false={interv.isDateChange}>
                                                         <td scope="row" data-index={index} data-current={interv.id}
                                                             onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.nom}</td>
+                                                        </template>    
+                                                        <template if:true={interv.timeDiff}>    
+                                                            <td scope="row" data-index={index} data-current={interv.id}
+                                                            onclick={showIntervention} ondblclick={navigateToAccount}
+                                                            class="slds-truncate reej-intervention-timediff">
+                                                            {interv.street}</td>
+                                                            
+                                                        <td scope="row" data-index={index} data-current={interv.id}
+                                                            onclick={showIntervention} ondblclick={navigateToAccount}
+                                                            class="slds-truncate reej-intervention-timediff">
+                                                            {interv.cp}</td>
+                                                        <td scope="row" data-index={index} data-current={interv.id}
+                                                                onclick={showIntervention} ondblclick={navigateToAccount}
+                                                                class="slds-truncate reej-intervention-timediff">
+                                                                {interv.city}
+                                                        </td>
+                                                        </template>
+                                                        <template if:false={interv.timeDiff}>    
+                                                            <td scope="row" data-index={index} data-current={interv.id}
+                                                            onclick={showIntervention} ondblclick={navigateToAccount}
+                                                            class="slds-truncate">
+                                                            {interv.street}</td>
+                                                            
                                                         <td scope="row" data-index={index} data-current={interv.id}
                                                             onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
                                                             {interv.cp}</td>
                                                         <td scope="row" data-index={index} data-current={interv.id}
-                                                            onclick={showIntervention} ondblclick={navigateToAccount}
-                                                            class="slds-truncate right">
-                                                            {interv.solde}</td>
+                                                                onclick={showIntervention} ondblclick={navigateToAccount}
+                                                                class="slds-truncate">
+                                                                {interv.city}
+                                                        </td>
+                                                        </template>
+                                                        <template if:true={interv.balance}> 
                                                         <td scope="row" data-index={index} data-current={interv.id}
                                                             onclick={showIntervention} ondblclick={navigateToAccount}
-                                                            class="slds-truncate">
-                                                            {interv.interventionDate}
-                                                        </td>
+                                                            class="slds-truncate right reej-intervention-balance">
+                                                            {interv.solde}</td>
+                                                        </template>
+                                                        <template if:false={interv.balance}> 
+                                                            <td scope="row" data-index={index} data-current={interv.id}
+                                                                onclick={showIntervention} ondblclick={navigateToAccount}
+                                                                class="slds-truncate right">
+                                                                {interv.solde}</td>
+                                                        </template>
                                                         <td scope="row" data-index={index} data-current={interv.id}
                                                             onclick={showIntervention} ondblclick={navigateToAccount}
                                                             class="slds-truncate">
@@ -170,17 +209,12 @@
                                                         <td scope="row" class="slds-truncate" data-index={index}
                                                             data-current={interv.id}>
                                                             <input type="text" value={interv.technicien} id={techInput}
-                                                                class="techInput slds-m-around_none" maxlength="2"
+                                                                class="techInput slds-m-around_none" maxlength="3"
                                                                 data-index={index} data-current={interv.id}
                                                                 data-cell="cellTechnicien" onkeyup={updateAlias}
                                                                 name="techInput">
-                                                            </input>
+                                                            
                                                         </td>
-                                                        <td scope="row" data-index={index} data-current={interv.id}
-                                                            onclick={showIntervention} ondblclick={navigateToAccount}
-                                                            style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;"
-                                                            class="slds-m-right_large">
-                                                            {interv.description}</td>
                                                     </tr>
                                                 </template>
                                             </template>
@@ -258,13 +292,24 @@
                                                                 city={intervention.Account__r.BillingCity}>
                                                             </lightning-formatted-address>
                                                         </div>
-                                                    </lightning-layout-item>
+                                                        <div class="slds-form-element__control">
+                                                            <template for:each={intervention.Materiels_Fournis__r}
+                                                                for:item="mat">
+                                                                <p key={mat.Id}>{mat.Name}</p>
+                                                            </template>
+                                                        </div>
+                                                    </lightning-layout-item> 
+                                                    <lightning-card>
+                                                        <lightning-datatable key-field="Id" data={lstAppareil}
+                                                            hide-checkbox-column columns={columns}>
+                                                        </lightning-datatable>
+                                                    </lightning-card>                                                   
                                                 </lightning-layout>
                                             </div>
                                         </lightning-card>
                                     </div>
                                 </lightning-layout-item>
-                                <lightning-card title="Description Intervention" icon-name="standard:maintenance_asset"
+                                <lightning-card title="Descriptif Intervention" icon-name="standard:maintenance_asset"
                                     variant="base">
                                     <div slot="actions">
                                         <ul class="slds-button-group-row">
@@ -280,7 +325,7 @@
                                         <lightning-layout class=" " multiple-rows="true">
                                             <lightning-layout-item>
                                                 <div class="slds-form-element"><span
-                                                        class="slds-form-element__label">Description</span>
+                                                        class="slds-form-element__label">Descriptif</span>
                                                     <div class="slds-form-element__control">
                                                         <p>{intervention.InterventionDescription__c}</p>
                                                     </div>
@@ -296,8 +341,8 @@
                                         <lightning-layout class="" multiple-rows="true">
                                             <lightning-layout-item>
                                                 <div class="slds-form-element   "><span
-                                                        class="slds-form-element__label">Matériel
-                                                        fourni</span>
+                                                        class="slds-form-element__label">
+                                                        Matériel fourni</span>
                                                     <div class="slds-form-element__control">
                                                         <template for:each={intervention.Materiels_Fournis__r}
                                                             for:item="mat">
@@ -308,11 +353,6 @@
                                             </lightning-layout-item>
                                         </lightning-layout>
                                     </div>
-                                </lightning-card>
-                                <lightning-card>
-                                    <lightning-datatable key-field="Id" data={lstAppareil} show-row-number-column
-                                        hide-checkbox-column columns={columns}>
-                                    </lightning-datatable>
                                 </lightning-card>
                             </div>
                         </template>

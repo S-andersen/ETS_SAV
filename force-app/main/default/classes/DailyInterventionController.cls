@@ -1,19 +1,19 @@
 /**
  * @description       : 
  * @author            : SANDERSEN
- * @last modified on  : 16/12/2021
- * @last modified by  : JBBARTHELEMY
+ * @last modified on  : 20/12/2021
+ * @last modified by  : SANDERSEN
 **/
 public with sharing class DailyInterventionController {
    
     @AuraEnabled(cacheable=false)
     public static List<Wrapper> getDailyInterventions(String chosenDate) {
-        System.debug('chosenDate: ' + chosenDate);
-        System.debug('date format: ' + date.valueOf(chosenDate));
 
 
-        List<Intervention__c> interventions = [SELECT Id, Account__r.CustomerCode__c, Name, Account__r.BillingPostalCode, Account__r.AccountingBalance__c,
-            StartDate__c, Type__c, Qualification__c, TemporaryTechnician__c, TemporaryTechnician__r.Alias, InterventionDescription__c,
+
+        List<Intervention__c> interventions = [SELECT Id, Account__r.Name, Account__r.CustomerCode__c, Name, Account__r.BillingPostalCode, Account__r.BillingStreet, 
+                                                      Account__r.BillingCity, Account__r.AccountingBalance__c, TemporaryTechnician__r.Alias,
+                                                      StartDate__c, Type__c, Qualification__c, TemporaryTechnician__c, InterventionDescription__c, EndDate__c,  
             (SELECT Id, Field, OldValue, NewValue FROM Histories WHERE Field = 'StartDate__c')
             FROM Intervention__c
             WHERE StartDate__c >= :date.valueOf(chosenDate) AND StartDate__c < :date.valueOf(chosenDate).addDays(1)
@@ -27,16 +27,21 @@ public with sharing class DailyInterventionController {
             Wrapper wrapper = new Wrapper();
             wrapper.id = intervention.id;
             wrapper.client = intervention.Account__r.CustomerCode__c;
-            wrapper.nom = intervention.Name;
+            wrapper.nom = intervention.Account__r.Name;
             wrapper.cp = intervention.Account__r.BillingPostalCode;
+            wrapper.city = intervention.Account__r.BillingCity;
+            wrapper.street = intervention.Account__r.BillingStreet;
             wrapper.solde = intervention.Account__r.AccountingBalance__c;
+            wrapper.balance = checkNegativeBalance(intervention.Account__r.AccountingBalance__c);
             wrapper.interventionDate = intervention.StartDate__c.format('dd/MM/yyyy');
             wrapper.interventionTime = intervention.StartDate__c.format('HH:mm');
+            wrapper.interventionEndTime = intervention.EndDate__c.format('HH:mm');
             wrapper.type = intervention.Type__c;
             wrapper.qualification = intervention.Qualification__c;
             wrapper.technicien = intervention.TemporaryTechnician__c != null ? intervention.TemporaryTechnician__r.Alias : '';
             wrapper.description = intervention.InterventionDescription__c;
             wrapper.isDateChange = intervention.Histories.size() > 0 ? true : false;
+            wrapper.timeDiff = checkInterventionTime(intervention.StartDate__c, intervention.EndDate__c); 
             response.add(wrapper);
         }
         System.debug('see the response?' + response);
@@ -52,12 +57,18 @@ public with sharing class DailyInterventionController {
         public String nom{get;set;}
         @AuraEnabled
         public String cp{get;set;}
+        @AuraEnabled 
+        public String city{get;set;}
+        @AuraEnabled 
+        public String street{get;set;}
         @AuraEnabled
         public Decimal solde{get;set;}
         @AuraEnabled
         public String interventionDate{get;set;}
         @AuraEnabled
         public String interventionTime{get;set;}
+        @AuraEnabled
+        public String interventionEndTime{get;set;}
         @AuraEnabled
         public String type{get;set;}
         @AuraEnabled
@@ -68,6 +79,10 @@ public with sharing class DailyInterventionController {
         public String description{get;set;}
         @AuraEnabled
         public Boolean isDateChange{get;set;}
+        @AuraEnabled 
+        public Boolean timeDiff{get;set;}
+        @AuraEnabled 
+        public Boolean balance{get;set;}
     }
 
 
@@ -86,10 +101,10 @@ public with sharing class DailyInterventionController {
             }
             map<Id, intervention__c> mapId = new map<Id, intervention__c> (
                 [SELECT Id, TemporaryTechnician__c, ValidateTechnician__c 
-                   FROM Intervention__c 
-                   WHERE Id 
-                   IN : intervId]);     
-                   System.debug('mapId:*** ' + mapId); 
+                FROM Intervention__c 
+                WHERE Id 
+                IN : intervId]);     
+                System.debug('mapId:*** ' + mapId); 
             
             for(intervention__c interv : mapId.values()){
                 interv.ValidateTechnician__c = interv.TemporaryTechnician__c; 
@@ -100,5 +115,18 @@ public with sharing class DailyInterventionController {
             throw new AuraHandledException(e.getMessage());
         }
 
+    }
+
+    public static Boolean checkInterventionTime(DateTime startTime, Datetime endTime){
+        Integer elapsedHours = endTime.hour() - startTime.hour(); 
+        System.debug(elapsedHours);
+       return elapsedHours >= 4 ? true:false; 
+    }
+
+    public static Boolean checkNegativeBalance(Decimal balance){
+        Decimal negativeBalance = balance; 
+
+        System.debug(negativeBalance); 
+        return negativeBalance < 0 ? true:false; 
     }
 }

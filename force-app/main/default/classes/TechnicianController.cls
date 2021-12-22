@@ -2,7 +2,6 @@ public with sharing class TechnicianController {
     @AuraEnabled(cacheable=true)
 
     public static List<Wrapper> getTechnicians(){
-        System.debug('I can see this');
 
         List<User> listTechAlias = [SELECT Id, Alias 
          FROM User

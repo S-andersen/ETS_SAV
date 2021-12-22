@@ -103,9 +103,10 @@
 
 th {
   font-weight: normal;
-  font-size: 16px;
-  padding: 15px;
+  font-size: 14px;
+  padding: 10px;
   border: 1px rgb(180, 180, 180) solid;
+  background-color: rgb(188, 195, 206);
 }
 
 td.right {
@@ -122,6 +123,7 @@ tr {
 }
 input{
 border-style: none;
+background-color: transparent;
   
 }
 .techInput{
@@ -130,5 +132,17 @@ border-style: none;
 }
 
 .reej-intervention-date-change{
-  background-color : #EC4134;
+  background-color : #EC4134 !important;
+}
+
+.reej-intervention-timediff{
+  background-color: lightblue !important;
+}
+
+.reej-intervention-balance{
+  color: #EC4134 !important; 
+}
+
+.reej-intervention-name{
+  background-color: yellow !important;
 }
