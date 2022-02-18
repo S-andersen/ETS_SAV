@@ -9,19 +9,18 @@ import { updateRecord } from 'lightning/uiRecordApi';
 import ID_FIELD from '@salesforce/schema/Intervention__c.Id';
 import TEMPORARYTECHNICIAN_FIELD from '@salesforce/schema/Intervention__c.TemporaryTechnician__c';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-// import { getPicklistValues } from 'lightning/uiObjectInfoApi';
-// import TYPE_FIELD from '@salesforce/schema/Intervention__c.Type__c';
+import getAbsentTechnicians from "@salesforce/apex/AbsenceController.getAbsentTechnicians";
 
 const COLUMNS = [
-    { label: "Type", fieldName: "Type__c", type: "text"},
-    { label: "Energie", fieldName: "Energy__c", type: "text",
-      cellAttributes: {
-          class:{fieldName:'energyColor'}
-      }},
-    { label: "Autre Energie", fieldName: "OtherEnergy__c", type: "text" }
+    { label: "Type", fieldName: "Type__c", type: "text" },
+    {
+        label: "Energie", fieldName: "Energy__c", type: "text",
+        cellAttributes: {
+            class: { fieldName: 'energyColor' }
+        }
+    },
+    { label: "Marque", fieldName: "Brand__c", type: "text" }
 ];
-
-
 Date.prototype.addDays = function (days) {
     var date = new Date(this.valueOf());
     date.setDate(date.getDate() + days);
@@ -37,14 +36,13 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
 
     @api recordId;
 
-
     @track PostingDate;
     @track dateDisplay;
     @track listAlias = [];
-    
     @track rowCount;
     @track newValue;
     @track listTechAlias;
+    @track listAbsentTechs = [];
 
     sortDirection = false;
     dailyInterventions;
@@ -59,9 +57,11 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
     value = 'JOUR';
     name;
     techInput;
-    absent = "DD";
-    timeDiff; 
-
+    timeDiff;
+    empty;
+    absentIndex;
+    absentTechnician;
+    listAbsentTechs;
 
 
     async connectedCallback() {
@@ -69,28 +69,18 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
         this.dateDisplay = this.PostingDate.toISOString();
         this.postingDateChange();
         this.postingTechniciansAlias();
-        console.log('absents: ' + absents);
     }
-
-    // //this method retrieves the picklist values of the intervention type
-    // @wire (getPicklistValues, {
-    //     recordTypeId: '012000000000000AAA', // Default record type Id
-    //     fieldApiName: TYPE_FIELD
-    // })
 
     countAlias() {
         var count = {};
-        console.log('list daily: ' + JSON.stringify(this.dailyInterventions));
 
         for (var element of this.dailyInterventions) {
-            console.log('element: ' + element);
             if (count[element.technicien]) {
                 count[element.technicien] += 1;
             } else {
                 count[element.technicien] = 1;
             }
         }
-        console.log('count ' + JSON.stringify(count));
         let test = [... this.listAlias];
         let i = 0;
 
@@ -107,11 +97,8 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
     }
 
     postingTechniciansAlias() {
-        console.log('enters postingTechniciansAlias');
-
         getTechnicians()
             .then(res => {
-                console.log('res?: ' + res);
                 if (res) {
                     this.listAlias = res;
                 }
@@ -120,6 +107,19 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
             })
             .catch(error => {
                 console.log(error);
+            });
+    }
+
+    postingAbsentTechnicians() {
+        getAbsentTechnicians({ chosenDate: this.PostingDate.toISOString(), plage: this.value })
+            .then(res => {
+                if (res) {
+                    this.listAbsentTechs = res;
+                    this.absentTechnician = this.listAbsentTechs;
+                }
+            })
+            .catch(error => {
+                console.log('postingTechnician' + JSON.stringify(error));
             });
     }
 
@@ -138,25 +138,28 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
 
             let techAlias = this.listAlias.find(techId => techId.alias == tmpAlias);
             if (techAlias != undefined) {
-                event.target.style.background = '#7fb467';
-                if (oldAlias != tmpAlias) {
-                    const fields = {};
-                    fields[ID_FIELD.fieldApiName] = this.dailyInterventions[rowIndex].id;
-                    fields[TEMPORARYTECHNICIAN_FIELD.fieldApiName] = techAlias.id;
-                    const recordInput = { fields }
-                    console.log('test update alias');
-                    updateRecord(recordInput)
-                        .then(() => {
-                        })
-                        .catch(error => { })
+                let techAbsent = this.absentTechnician.find(techId => techId.employee == tmpAlias);
+                if(techAbsent != undefined){
+                    event.target.style.background = '#f2cf5b';
+                } else {
+                    event.target.style.background = '#7fb467';
+                    if (oldAlias != tmpAlias) {
+                        const fields = {};
+                        fields[ID_FIELD.fieldApiName] = this.dailyInterventions[rowIndex].id;
+                        fields[TEMPORARYTECHNICIAN_FIELD.fieldApiName] = techAlias.id;
+                        const recordInput = { fields }
+                        updateRecord(recordInput)
+                            .then(() => {
+                            })
+                            .catch(error => { })
+                    }
                 }
 
             } else {
                 event.target.style.background = '#EC4134';
             }
 
-        }
-        else if (tmpAlias == '') {
+        } else if (tmpAlias == '') {
             this.dailyInterventions[rowIndex].technicien = tmpAlias;
             const fields = {};
             fields[ID_FIELD.fieldApiName] = this.dailyInterventions[rowIndex].id;
@@ -175,16 +178,33 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
     }
 
     postingDateChange() {
-        console.log('test');
-        getDailyInterventions({ chosenDate: this.PostingDate })
+        getDailyInterventions({ chosenDate: this.PostingDate, plage: this.value })
             .then(res => {
                 console.log('test 2 ' + res);
                 if (res) {
-                    this.allInterventionsList = res;
+                    this.allInterventionsList = res.map(item => {
+                        let qualifColor;
+                        switch (item.qualification) {
+                            case 'CHAUDIERE GAZ': qualifColor = "#f2cf5b"; break;
+                            case 'CHAUDIERE FIOUL': qualifColor = "#38c393"; break;
+                            case 'CHAUDIERE GRANULE': qualifColor = "#b9ac91"; break;
+                            case 'POELE A GRANULE': qualifColor = "#b9ac91"; break;
+                            case 'POMPE A CHALEUR EAU EAU': qualifColor = "#ff7b84"; break;
+                            case 'ADOUCISSEUR': qualifColor = "#0079bc"; break;
+                            case 'POMPE A CHALEUR AIR EAU': qualifColor = "#ff7b84"; break;
+                            case 'CLIMATISATION MONOSPLIT': qualifColor = "#a094ed"; break;
+                            case 'CLIMATISATION MULTISPLIT': qualifColor = "#a094ed"; break;
+                            case 'SOLAIRE THERMIQUE': qualifColor = "#ff9a3c"; break;
+                        }
+                        return {
+                            ...item,
+                            'qualifColor': qualifColor
+                        }
+                    })
                     this.dailyInterventions = JSON.parse(JSON.stringify(this.allInterventionsList));
-                    console.log(this.dailyInterventions);
                     this.rowCount = this.dailyInterventions.length;
                     this.postingTechniciansAlias();
+                    this.postingAbsentTechnicians();
                     this.countAlias();
 
                     getInterventions({ interventionId: this.dailyInterventions[0].id })
@@ -192,13 +212,12 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
                             let tmp = JSON.parse(JSON.stringify(result));
                             tmp.customerCode = tmp.Account__r.CustomerCode__c;
                             this.intervention = tmp;
-                            console.log(this.intervention);
 
                             getAppareilForAccount({ accountId: this.intervention.Account__c })
-                                .then(result => { 
-                                    this.lstAppareil = this.getEnergyColor(result); 
+                                .then(result => {
+                                    this.lstAppareil = this.getEnergyColor(result);
                                     this.nrAppareils = this.lstAppareil.length;
-                                    console.log(this.lstAppareil);
+                                    this.empty = this.nrAppareils == 0 ? true : false;
                                 })
                                 .catch(error => {
                                     console.log(error);
@@ -214,11 +233,10 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
             })
     }
 
-    // this method updates the technicians from temporary to confirmed on intervention object
+    // this method updates and saves the technicians from temporary to confirmed on intervention object
     // by clicking the button 
 
     handleClick(event) {
-        console.log('SAVE button clicked');
         saveConfirmedTechnicians({ interventionsToUpdate: this.dailyInterventions })
             .then(() => {
                 this.dispatchEvent(
@@ -236,37 +254,15 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
                     })
                 );
             });
-
     }
 
-
-
+    // this method selects and shows the table data upon the selection of AM/PM/JOUR 
     handleRadioChange(event) {
-        const selectedOption = event.target.value;
-
-
-        if (selectedOption == 'AM') {
-            this.dailyInterventions = this.allInterventionsList.filter(interv =>
-                parseFloat(interv.interventionTime.replace(':', '.')) < 12.00);
-            this.rowCount = this.dailyInterventions.length;
-        }
-
-        if (selectedOption == 'PM') {
-            console.log('PM click');
-            this.dailyInterventions = this.allInterventionsList.filter(interv =>
-                parseFloat(interv.interventionTime.replace(':', '.')) >= 12.00);
-            this.rowCount = this.dailyInterventions.length;
-        }
-
-        if (selectedOption == 'JOUR') {
-            console.log('JOUR click');
-            this.dailyInterventions = this.allInterventionsList;
-            this.rowCount = this.dailyInterventions.length;
-        }
+        this.value = event.target.value;
+        this.postingDateChange();
     }
 
     handleDateChange(event) {
-
         this.PostingDate = new Date(event.target.value);
         this.dateDisplay = this.PostingDate.toISOString();
         this.postingDateChange()
@@ -284,7 +280,7 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
         this.postingDateChange();
     }
 
-    // this method retrieves allows the user to navigate to the Account page by clicking the search icon
+    // this method allows the user to navigate to the Account page by clicking the icon
     navigateToAccount() {
         this[NavigationMixin.Navigate]({
             type: "standard__recordPage",
@@ -296,12 +292,13 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
         });
     }
 
-    // this method retrieves allows the user to navigate to the Intervention page by clicking the search icon
-    navigateToIntervention() {
+    // this method allows the user to navigate to the Intervention page by clicking the icon
+    navigateToIntervention(e) {
+        e.preventDefault();
         this[NavigationMixin.Navigate]({
             type: "standard__recordPage",
             attributes: {
-                recordId: this.intervention.id,
+                recordId: e.target.dataset.current,
                 objectApiName: "Intervention__c",
                 actionName: "view"
             }
@@ -309,23 +306,19 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
     }
 
     // this method updates the client and intervention card on the right hand side,
-    // when the client code in the main table has been clicked.
-    // By default the first intervention in the main table is shown.
+    // when a row in the main table has been clicked.
     showIntervention(event) {
-        console.log("intervention Id:" + event.target.dataset.current);
 
         getInterventions({ interventionId: event.target.dataset.current })
             .then(result => {
                 let tmp = JSON.parse(JSON.stringify(result));
                 tmp.customerCode = tmp.Account__r.CustomerCode__c;
                 this.intervention = tmp;
-                console.log(this.intervention);
 
                 getAppareilForAccount({ accountId: this.intervention.Account__c })
                     .then(result => {
                         this.lstAppareil = this.getEnergyColor(result);
                         this.nrAppareils = this.lstAppareil.length;
-                        console.log(this.lstAppareil);
                     })
                     .catch(error => {
                         console.log(error);
@@ -336,31 +329,31 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
             });
     }
 
-    getEnergyColor(result){
+    //this method conditions the background color on the Energy column in the smaller intervention table
+    getEnergyColor(result) {
         return result.map(item => {
-            let energyColor; 
-            switch(item.Energy__c){
+            let energyColor;
+            switch (item.Energy__c) {
                 case 'Gaz': energyColor = "slds-icon-standard-case slds-text-color_default"; break;
                 case 'Electricité / Pompe à chaleur': energyColor = "slds-icon-custom-custom32 slds-text-color_default"; break;
                 case 'Bois / Granule': energyColor = " slds-icon-standard-fulfillment-order slds-text-color_default"; break;
                 case 'Fioul': energyColor = "slds-icon-standard-loop slds-text-color_default"; break;
                 case 'Eau / Adoucisseur traitement eau': energyColor = "slds-icon-standard-flow slds-text-color_default"; break;
                 case 'Ramonage': energyColor = "slds-icon-standard-group-loading slds-text-color_default"; break;
-                
             }
-            return {...item, 
-                'energyColor':energyColor
+            return {
+                ...item,
+                'energyColor': energyColor
             }
         });
     }
 
-
-    //this method sorts the columns in the main data table 
+    //this method sorts the columns in the main data table ASC and DES
     sortColumn(columnName) {
 
         let key = columnName.target.title.toLowerCase();
-        console.log('key: ' + key);
         this.sortDirection = !this.sortDirection;
+        this.dailyInterventions = JSON.parse(JSON.stringify(this.dailyInterventions));
 
         if (key == 'heure') {
             key = "interventionTime";
@@ -369,13 +362,19 @@ export default class planificationSAV extends NavigationMixin(LightningElement) 
                 return this.sortDirection ? parseFloat(a[key].replace(':', '.')) - parseFloat(b[key].replace(':', '.')) :
                     parseFloat(b[key].replace(':', '.')) - parseFloat(a[key].replace(':', '.'));
             });
-        } else {
-            const dataType = typeof this.dailyInterventions[0][key];
-            this.dailyInterventions = JSON.parse(JSON.stringify(this.dailyInterventions));
+        } else if (key == 'solde') {
+            this.dailyInterventions.sort((a, b) => {
+                return this.sortDirection ? a[key] - b[key] : b[key] - a[key]
+            });
 
+        } else {
             this.dailyInterventions.sort((a, b) => {
                 return this.sortDirection ? a[key].localeCompare(b[key]) : b[key].localeCompare(a[key])
             });
         }
     }
-} 
+    //this method refreshes the component
+    refreshComponent() {
+        this.postingDateChange();
+    }
+}

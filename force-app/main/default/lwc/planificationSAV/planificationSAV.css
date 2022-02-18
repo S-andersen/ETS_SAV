@@ -106,7 +106,13 @@ th {
   font-size: 14px;
   padding: 10px;
   border: 1px rgb(180, 180, 180) solid;
-  background-color: rgb(188, 195, 206);
+  background-color: rgb(208, 219, 236);
+}
+
+th:hover{
+  color: black;
+  font-weight:500;  
+  background-color: rgb(208, 219, 236);
 }
 
 td.right {
@@ -118,14 +124,21 @@ tr {
   cursor:pointer
 }
 
+tr:nth-child(even) {background: rgb(246, 245, 245)}
+tr:nth-child(odd) {background: #FFF}
+
 .radio{
   grid-template-columns: minmax(50px, 200px)1fr 1fr;
 }
 input{
 border-style: none;
 background-color: transparent;
+outline: none; 
+width: 100%;
+box-sizing: border-box;
   
 }
+
 .techInput{
   margin-right: 1em;
   display: inline-flex;

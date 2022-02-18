@@ -7,8 +7,6 @@ public with sharing class TechnicianController {
          FROM User
          WITH SECURITY_ENFORCED];
 
-         System.debug('I can see this list' + listTechAlias);
-
 List<Wrapper> response = new List<Wrapper>();
         for(User technician: listTechAlias){
             Wrapper wrapper = new Wrapper();
@@ -17,10 +15,8 @@ List<Wrapper> response = new List<Wrapper>();
             wrapper.nr = 0; 
             response.add(wrapper);
         }
-        System.debug(response);
         return response;
     }
-
     public class Wrapper{
         @AuraEnabled
         public String id{get;set;}
@@ -31,6 +27,4 @@ List<Wrapper> response = new List<Wrapper>();
         @AuraEnabled
         public Integer nr{get;set;}
     }
-
-    
 }

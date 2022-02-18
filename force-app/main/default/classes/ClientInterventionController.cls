@@ -1,18 +1,9 @@
-/*
-    @description       : This controller is used to fetch information on all client interventions display in in the main UI table
-    @author            : 02/11/2021 by SANDERSEN
-    @last modified on  : 15/11/2021
-    @last modified by  : SANDERSEN
-*/
-
-
-
 public with sharing class ClientInterventionController {
     @AuraEnabled(cacheable=true)
 
     public static List<Wrapper> getClientInterventions() {
         List<Intervention__c> result = [
-            SELECT Account__r.CustomerCode__c, Name, Account__r.ShippingPostalCode, Account__r.AccountingBalance__c, StartDate__c, Type__c, Qualification__c, ValidateTechnician__c, InterventionDescription__c
+            SELECT Account__r.CustomerCode__c, Name, Account__r.RiskCode__c, Account__r.ShippingPostalCode, Account__r.AccountingBalance__c, StartDate__c, Type__c, Qualification__c, ValidateTechnician__c, InterventionDescription__c
             FROM Intervention__c
             ORDER BY StartDate__c ASC
            
@@ -29,6 +20,7 @@ public with sharing class ClientInterventionController {
             wrapper.interventionQualification = clientIntervention.Qualification__c;
             wrapper.interventionValidateTechnician = clientIntervention.ValidateTechnician__c;
             wrapper.interventionDescription = clientIntervention.InterventionDescription__c;
+            wrapper.riskCode = clientIntervention.Account__r.RiskCode__c ? 'Oui' : 'Non'; 
             wrapperList.add(wrapper);
         }
         return wrapperList;
@@ -53,5 +45,7 @@ public with sharing class ClientInterventionController {
         public String interventionValidateTechnician {set;get;}
         @AuraEnabled
         public String interventionDescription {set;get;}
+        @AuraEnabled
+        public String riskCode {set;get;}
     }
 }

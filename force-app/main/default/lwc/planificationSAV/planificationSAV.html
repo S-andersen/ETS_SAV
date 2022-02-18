@@ -1,10 +1,3 @@
-<!--
-  @description       : 
-  @author            : JBBARTHELEMY // SANDERSEN
-  @group             : 
-  @last modified on  : 16/12/2021
-  @last modified by  : JBBARTHELEMY
--->
 <template>
     <lightning-card title="Planning intervention" icon-name="standard:work_plan">
         <div slot="footer">
@@ -16,18 +9,18 @@
 
         <div class="slds-card__body_inner">
             <lightning-layout pull-to-boundary="medium" multiple-rows="true">
-                <lightning-layout-item padding="horizontal-medium" size="12" small-device-size="12"
+                <lightning-layout-item key={absTech} padding="horizontal-medium" size="12" small-device-size="12"
                     medium-device-size="6" large-device-size="6">
-                    <span> <strong>TEC:</strong> AL CC DM
+                    <span> 
                         </br>
-                        <strong>CHA:</strong> AX FC SC YB
+                        <strong> Absent(s):</strong>
                         </br>
-                        <strong>ELE:</strong> AA CB JZ
-                        </br>
-                        <strong>BUR:</strong> LLJ KL AC
-                        </br>
-                        <strong>absent(s): {absent} </strong>
                     </span>
+                    <template for:each={absentTechnician} for:item="absentee" for:index="absentIndex">
+                        <p class="techInput" key={absentee.id}>
+                            <span><strong>{absentee.employee} :</strong> {absentee.type}</span>
+                        </p>
+                    </template>
                 </lightning-layout-item>
 
                 <lightning-layout-item key={technAlias} padding="horizontal-medium" size="12" small-device-size="12"
@@ -83,14 +76,14 @@
                                         </lightning-button-group>
                                         <div class="slds-text-align_right">
                                             <lightning-button-icon label="Refresh" icon-position="right" class="button-1"
-                                                icon-name="utility:refresh" onclick={resfresh}></lightning-button-icon>
+                                                icon-name="utility:refresh" onclick={refreshComponent}></lightning-button-icon>
                                         </div>
                                     </lightning-layout>
                                 </lightning-layout-item>
                             </lightning-layout>
                             <lightning-layout>
                                 <lightning-layout-item>
-                                    <table id="Table-id" class="slds-table slds-table_fixed-layout slds-table_striped
+                                    <table id="Table-id" class="slds-table slds-table_fixed-layout 
                                         slds-max-medium-table_stacked-horizontal">
                                         <tr class="slds-icon-utility-arrowdown slds-is-sortable slds-is-sorted_asc">
                                             <th scope="col" onclick={sortColumn} class="slds-truncate" title="Client">
@@ -120,6 +113,7 @@
                                                 <template for:each={dailyInterventions} for:item="interv"
                                                     for:index="index">
                                                     <tr class="slds-card slds-card_boundary tableRows"
+                                                        oncontextmenu={navigateToIntervention}
                                                         style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;"
                                                         key={interv.id} data-index={index} data-current={interv.id}
                                                         onclick={showIntervention} ondblclick={navigateToAccount}>
@@ -204,17 +198,28 @@
                                                             {interv.type}</td>
                                                         <td scope="row" data-index={index} data-current={interv.id}
                                                             onclick={showIntervention} ondblclick={navigateToAccount}
-                                                            class="slds-truncate">
+                                                            class="slds-truncate " bgcolor={interv.qualifColor}>
                                                             {interv.qualification}</td>
-                                                        <td scope="row" class="slds-truncate" data-index={index}
+                                                        <template if:true={interv.absenceCheck}> 
+                                                        <td scope="row" class="slds-truncate reej-intervention-name" data-index={index}
                                                             data-current={interv.id}>
                                                             <input type="text" value={interv.technicien} id={techInput}
                                                                 class="techInput slds-m-around_none" maxlength="3"
                                                                 data-index={index} data-current={interv.id}
                                                                 data-cell="cellTechnicien" onkeyup={updateAlias}
                                                                 name="techInput">
-                                                            
                                                         </td>
+                                                        </template>
+                                                        <template if:false={interv.absenceCheck}> 
+                                                            <td scope="row" class="slds-truncate" data-index={index}
+                                                                data-current={interv.id}>
+                                                                <input type="text" value={interv.technicien} id={techInput}
+                                                                    class="techInput slds-m-around_none" maxlength="3"
+                                                                    data-index={index} data-current={interv.id}
+                                                                    data-cell="cellTechnicien" onkeyup={updateAlias}
+                                                                    name="techInput">
+                                                            </td>
+                                                        </template>
                                                     </tr>
                                                 </template>
                                             </template>
@@ -246,7 +251,7 @@
                                                                 class="span-4 slds-form-element__label">Code</span>
                                                             <div class="slds-form-element__control">
                                                                 <span class="slds-form-element__static">
-                                                                    <p>{intervention.Account__r.CustomerCode__c}
+                                                                    <p>Client à risque ? {intervention.Account__r.CustomerCode__c}
                                                                     </p>
                                                                 </span>
                                                             </div>
@@ -295,14 +300,19 @@
                                                         <div class="slds-form-element__control">
                                                             <template for:each={intervention.Materiels_Fournis__r}
                                                                 for:item="mat">
-                                                                <p key={mat.Id}>{mat.Name}</p>
+                                                                <p key={mat.Id}></p>
                                                             </template>
                                                         </div>
                                                     </lightning-layout-item> 
                                                     <lightning-card>
-                                                        <lightning-datatable key-field="Id" data={lstAppareil}
-                                                            hide-checkbox-column columns={columns}>
+                                                        <template if:false={empty}>
+                                                        <lightning-datatable 
+                                                            key-field="Id" 
+                                                            data={lstAppareil}
+                                                            hide-checkbox-column 
+                                                            columns={columns}>
                                                         </lightning-datatable>
+                                                        </template>
                                                     </lightning-card>                                                   
                                                 </lightning-layout>
                                             </div>
@@ -311,36 +321,32 @@
                                 </lightning-layout-item>
                                 <lightning-card title="Descriptif Intervention" icon-name="standard:maintenance_asset"
                                     variant="base">
-                                    <div slot="actions">
-                                        <ul class="slds-button-group-row">
-                                            <li class="slds-button-group-item">
-                                                <lightning-button-icon icon-name="utility:search"
-                                                    onclick={navigateToIntervention} variant="border-filled"
-                                                    alternative-text="view" size="medium">
-                                                </lightning-button-icon>
-                                            </li>
-                                        </ul>
-                                    </div>
                                     <div class="slds-card__body_inner">
                                         <lightning-layout class=" " multiple-rows="true">
                                             <lightning-layout-item>
                                                 <div class="slds-form-element"><span
                                                         class="slds-form-element__label">Descriptif</span>
                                                     <div class="slds-form-element__control">
-                                                        <p>{intervention.InterventionDescription__c}</p>
+                                                        <lightning-formatted-rich-text escape="false" value={intervention.InterventionDescription__c}></lightning-formatted-rich-text>
                                                     </div>
                                                 </div>
                                                 <div class="slds-form-element   "><span
                                                         class="slds-form-element__label">Commentaire</span>
                                                     <div class="slds-form-element__control ">
-                                                        <p>{intervention.Commentaires__c}</p>
+                                                        <lightning-formatted-rich-text escape="false" value={intervention.Commentaires__c}></lightning-formatted-rich-text>
                                                     </div>
                                                 </div>
+                                                <div class="slds-form-element   "><span
+                                                    class="slds-form-element__label">Appareil</span>
+                                                <div class="slds-form-element__control ">
+                                                    <p>{intervention.Appareil__r.Name}</p>
+                                                </div>
+                                            </div>
                                             </lightning-layout-item>
                                         </lightning-layout>
                                         <lightning-layout class="" multiple-rows="true">
                                             <lightning-layout-item>
-                                                <div class="slds-form-element   "><span
+                                                <div class="slds-form-element"><span
                                                         class="slds-form-element__label">
                                                         Matériel fourni</span>
                                                     <div class="slds-form-element__control">
